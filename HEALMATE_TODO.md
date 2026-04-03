@@ -4,10 +4,10 @@ Based on the Product Requirements Document (PRD) and Tech Stack, here is a struc
 
 ## Phase 1: Project Setup & Architecture
 - [ ] Initialize frontend repository (React.js + Tailwind CSS)
-- [ ] Initialize backend repository (Node.js + Express.js)
+- [x] Initialize backend repository (Node.js + Express.js)
 - [x] Set up database cluster (MongoDB Atlas) and basic connection
-- [ ] Set up Firebase project for Authentication and Cloud Messaging (FCM)
-- [ ] Initialize Python environment for the AI/ML module
+- [x] Set up Firebase project for Authentication and Cloud Messaging (FCM)
+- [x] Initialize Python environment for the AI/ML module
 
 ## Phase 2: Database & Backend Foundation
 - [x] Design and implement MongoDB schemas:
@@ -36,7 +36,7 @@ Based on the Product Requirements Document (PRD) and Tech Stack, here is a struc
 
 ## Phase 4: AI Prediction Engine (Core Feature)
 - [ ] Set up the Machine Learning pipeline (Python, scikit-learn/TensorFlow)
-- [ ] Prepare training data structure (Past medication logs, time-based adherence patterns)
+- [x] Prepare training data structure (Past medication logs, time-based adherence patterns)
 - [ ] Develop behavior analysis algorithm to detect patterns (e.g., frequent missed times, weekend skips)
 - [ ] Train AI model to output:
   - [ ] Probability of missing the next dose
