@@ -14,6 +14,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const medicationRoutes = require('./src/routes/medicationRoutes');
 const adherenceRoutes = require('./src/routes/adherenceRoutes');
+const doctorRoutes = require('./src/routes/doctorRoutes');
 
 // ── Init ──────────────────────────────────────────────
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/medications', medicationRoutes);
 app.use('/api/adherence', adherenceRoutes);
+app.use('/api/doctor', doctorRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
