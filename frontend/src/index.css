@@ -1,3 +1,94 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-cream-100 text-forest-500;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    @apply bg-forest-500 text-cream-50;
+  }
+}
+
+@layer components {
+  /* Pill-shaped button — Raus style */
+  .btn-pill {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 active:scale-[0.97] cursor-pointer whitespace-nowrap;
+  }
+
+  .btn-pill-primary {
+    @apply btn-pill bg-gold-300 text-forest-500 px-8 py-4 text-sm font-semibold shadow-gold hover:brightness-105;
+  }
+
+  .btn-pill-dark {
+    @apply btn-pill bg-forest-500 text-cream-50 px-8 py-4 text-sm font-semibold hover:bg-forest-600;
+  }
+
+  .btn-pill-outline {
+    @apply btn-pill border-2 border-forest-500/15 text-forest-500 px-6 py-3 text-sm hover:bg-forest-50;
+  }
+
+  .btn-pill-ghost {
+    @apply btn-pill text-forest-500 px-4 py-2 text-sm hover:bg-cream-200;
+  }
+
+  /* Warm card containers */
+  .card-warm {
+    @apply bg-white rounded-[2rem] p-8 shadow-warm border border-cream-200/60;
+  }
+
+  .card-warm-sm {
+    @apply bg-white rounded-3xl p-6 shadow-warm border border-cream-200/60;
+  }
+
+  /* Input fields — warm style */
+  .input-warm {
+    @apply w-full px-5 py-3.5 rounded-2xl border-2 border-cream-200 bg-cream-50 text-forest-500 placeholder:text-forest-500/30 
+           focus:border-forest-300 focus:bg-white focus:ring-0 focus:outline-none transition-all duration-300;
+  }
+
+  /* Label */
+  .label-warm {
+    @apply block text-xs font-semibold text-forest-500/50 uppercase tracking-[0.15em] mb-2;
+  }
+}
+
+/* Smooth page transitions */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeSlideUp 0.5s ease-out forwards;
+}
+
+/* Custom scrollbar — warm minimal */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 65, 34, 0.12);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 65, 34, 0.24);
+}

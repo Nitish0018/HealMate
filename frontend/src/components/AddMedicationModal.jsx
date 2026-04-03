@@ -3,7 +3,7 @@ import LoadingSpinner from './LoadingSpinner';
 
 /**
  * AddMedicationModal
- * Modal for patients to add new medications to their schedule
+ * Raus-inspired: warm, editorial modal with generous spacing
  */
 const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
   const [formData, setFormData] = useState({
@@ -20,7 +20,7 @@ const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.dosage) {
-      setError('Please fill in all fields');
+      setError('Please fill in all required fields');
       return;
     }
 
@@ -31,14 +31,13 @@ const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
       const medicationData = {
         ...formData,
         patientId,
-        drug: formData.name, // Mapping for backend if needed
+        drug: formData.name,
         dose_val_rx: formData.dosage,
         frequency: formData.frequency,
       };
 
       await onAdd(medicationData);
       onClose();
-      // Reset form
       setFormData({
         name: '',
         dosage: '',
@@ -46,96 +45,107 @@ const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
         scheduledTime: '08:00',
       });
     } catch (err) {
-      setError(err.message || 'Failed to add medication');
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 transition-opacity">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-5 bg-forest-500/20 backdrop-blur-md animate-fade-in">
+      <div className="card-warm w-full max-w-lg overflow-hidden transform">
         {/* Header */}
-        <div className="px-6 py-4 bg-blue-600 text-white flex justify-between items-center">
-          <h2 className="text-xl font-bold">Add Medication</h2>
-          <button onClick={onClose} className="text-white hover:text-blue-100 transition">
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex justify-between items-start mb-8">
+          <div>
+             <h2 className="font-serif text-2xl text-forest-500">New Prescription</h2>
+             <p className="text-xs font-medium text-forest-500/40 mt-1 uppercase tracking-wider">Add to your care plan</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-3 bg-cream-100 hover:bg-red-50 text-forest-500/30 hover:text-red-500 rounded-xl transition-all duration-300 group active:scale-90"
+            id="modal-close"
+          >
+            <svg className="h-5 w-5 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+            <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium">
               {error}
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Medication Name</label>
-            <input
-              type="text"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-              placeholder="e.g. Lisinopril"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Dosage</label>
-            <input
-              type="text"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-              placeholder="e.g. 10mg"
-              value={formData.dosage}
-              onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
-                value={formData.frequency}
-                onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-              >
-                <option>Once daily</option>
-                <option>Twice daily</option>
-                <option>Three times daily</option>
-                <option>As needed</option>
-              </select>
+              <label className="label-warm">Medication Name</label>
+              <input
+                type="text"
+                required
+                className="input-warm"
+                placeholder="e.g. Metformin"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label-warm">Frequency</label>
+                <select
+                  className="input-warm appearance-none cursor-pointer"
+                  value={formData.frequency}
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                >
+                  <option>Once daily</option>
+                  <option>Twice daily</option>
+                  <option>Three times daily</option>
+                  <option>As needed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="label-warm">Dosage</label>
+                <input
+                  type="text"
+                  required
+                  className="input-warm"
+                  placeholder="e.g. 10mg"
+                  value={formData.dosage}
+                  onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Time</label>
+              <label className="label-warm">Scheduled Time</label>
               <input
                 type="time"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="input-warm cursor-text"
                 value={formData.scheduledTime}
                 onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
               />
             </div>
           </div>
 
-          <div className="pt-4 flex space-x-3">
+          <div className="pt-4 flex flex-col sm:flex-row gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              className="flex-1 btn-pill-outline py-4"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-50 flex items-center justify-center"
+              id="modal-submit"
+              className="flex-1 btn-pill-primary py-4 disabled:opacity-50 flex items-center justify-center"
             >
-              {isSubmitting ? <><LoadingSpinner size="sm" /> <span className="ml-2">Adding...</span></> : 'Add Medication'}
+              {isSubmitting ? <LoadingSpinner size="sm" color="border-forest-500" /> : 'Add Medication →'}
             </button>
           </div>
         </form>

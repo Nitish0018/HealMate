@@ -49,6 +49,11 @@ export const AuthProvider = ({ children }) => {
             email: firebaseUser.email,
             displayName: profile.name || firebaseUser.displayName,
             role: profile.role,
+            mimic_subject_id: profile.mimic_subject_id,
+            currentStreak: profile.currentStreak || 0,
+            maxStreak: profile.maxStreak || 0,
+            healthScore: profile.healthScore || 100,
+            badges: profile.badges || [],
           };
 
           setUser(userData);

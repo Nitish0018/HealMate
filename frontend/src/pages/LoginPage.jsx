@@ -52,10 +52,7 @@ const LoginPage = () => {
     
     try {
       await login(email, password);
-      // Navigation is now handled by the useEffect above
-      // once 'role' has been fetched and updated from the AuthContext.
     } catch (err) {
-      // Error is already set in AuthContext
       console.error('Login failed:', err);
     } finally {
       setIsSubmitting(false);
@@ -65,88 +62,111 @@ const LoginPage = () => {
   const displayError = formError || authError;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-5">
+      {/* Decorative background shapes */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-forest-50/40 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-gold-50/60 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md animate-fade-in">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-blue-600 hover:text-blue-700 transition-colors mb-2">HealMate</h1>
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-flex items-center gap-3 group" id="login-logo">
+            <div className="w-12 h-12 bg-forest-500 rounded-full flex items-center justify-center text-cream-50 shadow-warm group-hover:scale-105 transition-transform">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <span className="font-serif text-3xl text-forest-500">HealMate</span>
           </Link>
-          <p className="text-gray-600">Sign in to your account</p>
+          <p className="mt-4 text-forest-500/50 text-base font-medium">
+            Welcome back. Sign in to continue your journey.
+          </p>
         </div>
 
-        {/* Error Message */}
-        {displayError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm">{displayError}</p>
-          </div>
-        )}
+        {/* Card */}
+        <div className="card-warm">
+          {/* Error Message */}
+          {displayError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl" id="login-error">
+              <p className="text-red-600 text-sm font-medium">{displayError}</p>
+            </div>
+          )}
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="you@example.com"
-              disabled={isSubmitting}
-              autoComplete="email"
-            />
-          </div>
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="label-warm">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-warm"
+                placeholder="you@example.com"
+                disabled={isSubmitting}
+                autoComplete="email"
+              />
+            </div>
 
-          {/* Password Field */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="Enter your password"
-              disabled={isSubmitting}
-              autoComplete="current-password"
-            />
-          </div>
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="label-warm">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-warm"
+                placeholder="Enter your password"
+                disabled={isSubmitting}
+                autoComplete="current-password"
+              />
+            </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {isSubmitting ? (
-              <>
-                <LoadingSpinner size="sm" />
-                <span className="ml-2">Signing in...</span>
-              </>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        {/* Register Link */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            Don't have an account?{' '}
+            {/* Submit Button */}
             <button
-              onClick={() => navigate(ROUTES.REGISTER)}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              type="submit"
               disabled={isSubmitting}
+              id="login-submit"
+              className="w-full btn-pill-primary py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create an account
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LoadingSpinner size="sm" color="border-forest-500" />
+                  Signing in...
+                </span>
+              ) : (
+                <>
+                  Sign In
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
+              )}
             </button>
-          </p>
+          </form>
+
+          {/* Register Link */}
+          <div className="mt-8 text-center">
+            <p className="text-forest-500/40 text-sm">
+              Don't have an account?{' '}
+              <button
+                onClick={() => navigate(ROUTES.REGISTER)}
+                className="text-forest-500 font-semibold hover:text-forest-300 transition-colors"
+                disabled={isSubmitting}
+                id="login-register-link"
+              >
+                Create one →
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>

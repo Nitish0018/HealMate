@@ -12,7 +12,10 @@ export const ROUTES = {
   // Doctor routes
   DOCTOR_DASHBOARD: '/doctor/dashboard',
   DOCTOR_PATIENT_DETAIL: '/doctor/patient/:patientId',
-  
+
+  // Caregiver routes
+  CAREGIVER_DASHBOARD: '/caregiver/dashboard',
+
   // Helper function to generate patient detail route
   getPatientDetailRoute: (patientId) => `/doctor/patient/${patientId}`,
 };

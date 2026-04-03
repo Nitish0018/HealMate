@@ -1,18 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '../constants/routes';
 
 /**
  * Navigation Component
- * Responsive navigation with role-based menu items and collapsible mobile menu
+ * Raus-inspired: minimal, warm, floating pill nav
  */
 const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, role, logout } = useAuth();
   const location = useLocation();
 
-  // Define navigation items based on role
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const getNavigationItems = () => {
     const commonItems = [
       { name: 'Profile', path: ROUTES.PROFILE },
@@ -28,48 +36,50 @@ const Navigation = () => {
         { name: 'Dashboard', path: ROUTES.DOCTOR_DASHBOARD },
         ...commonItems
       ];
+    } else if (role === 'CAREGIVER') {
+      return [
+        { name: 'Dashboard', path: ROUTES.CAREGIVER_DASHBOARD },
+        ...commonItems
+      ];
     }
     return [];
   };
 
   const navigationItems = getNavigationItems();
 
-  const isActivePath = (path) => {
-    return location.pathname === path;
-  };
+  const isActivePath = (path) => location.pathname === path;
 
-  const handleLogout = async () => {
-    await logout();
-    setMobileMenuOpen(false);
-  };
-
-  if (!user) {
-    return null; // Don't show navigation if not authenticated
-  }
+  if (!user) return null;
 
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo and Desktop Navigation */}
-          <div className="flex">
-            {/* Logo */}
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-xl font-bold text-blue-600">
-                HealMate
-              </Link>
-            </div>
+    <nav className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? 'py-3' : 'py-5'}`}>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        <div className="flex justify-between items-center">
+          {/* Left cluster: Logo + Nav pills */}
+          <div className="flex items-center gap-3">
+            {/* Brand */}
+            <Link to="/" className="flex items-center group" id="nav-logo">
+              <div className="w-11 h-11 bg-forest-500 rounded-full flex items-center justify-center text-cream-50 shadow-warm group-hover:scale-105 transition-transform duration-300">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+            </Link>
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden md:ml-6 md:flex md:space-x-8">
+            {/* Nav pills — floating capsule like Raus */}
+            <div className={`hidden lg:flex items-center gap-1 rounded-full px-2 py-1.5 transition-all duration-500 ${
+              scrolled 
+                ? 'bg-forest-500/80 backdrop-blur-xl shadow-warm' 
+                : 'bg-forest-500/70 backdrop-blur-md'
+            }`}>
               {navigationItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     isActivePath(item.path)
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'bg-white/20 text-white'
+                      : 'text-cream-100/70 hover:text-white'
                   }`}
                 >
                   {item.name}
@@ -78,117 +88,71 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Desktop User Menu */}
-          <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
-            <span className="text-sm text-gray-700">
-              {user.displayName || user.email}
-            </span>
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-              {role}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
+          {/* Right cluster */}
+          <div className="flex items-center gap-3">
+            {/* User info — hidden on mobile */}
+            <div className="hidden md:flex items-center gap-3 mr-1">
+              <div className="w-9 h-9 rounded-full bg-forest-50 text-forest-500 flex items-center justify-center text-sm font-semibold border-2 border-cream-200">
+                {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-forest-500 leading-tight">
+                  {user.displayName || user.email.split('@')[0]}
+                </span>
+                <span className="text-[10px] font-medium text-forest-300 uppercase tracking-wider">
+                  {role}
+                </span>
+              </div>
+            </div>
 
-          {/* Mobile Menu Button - Touch-friendly 44x44px */}
-          <div className="flex items-center md:hidden">
+            {/* Logout button */}
+            <button
+              onClick={logout}
+              id="nav-logout"
+              className="hidden lg:flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-forest-500/10 text-forest-500/60 text-sm font-medium hover:border-red-200 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 active:scale-95"
+            >
+              Sign out
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </button>
+
+            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors"
-              style={{ minWidth: '44px', minHeight: '44px' }}
-              aria-expanded={mobileMenuOpen}
-              aria-label="Toggle menu"
+              className="lg:hidden w-11 h-11 rounded-full bg-forest-500/80 backdrop-blur-md flex items-center justify-center text-cream-50 transition-all"
+              id="nav-mobile-toggle"
             >
-              <span className="sr-only">Open main menu</span>
-              {/* Hamburger Icon */}
-              {!mobileMenuOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              )}
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"} />
+              </svg>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu - Collapsible */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200">
-          <div className="pt-2 pb-3 space-y-1">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors ${
-                  isActivePath(item.path)
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                }`}
-                style={{ minHeight: '44px' }}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Mobile User Section */}
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex items-center px-4 mb-3">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-                  {(user.displayName || user.email).charAt(0).toUpperCase()}
-                </div>
-              </div>
-              <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">
-                  {user.displayName || user.email}
-                </div>
-                <div className="text-sm font-medium text-gray-500">{role}</div>
-              </div>
-            </div>
-            <div className="px-4">
-              <button
-                onClick={handleLogout}
-                className="w-full flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                style={{ minHeight: '44px' }}
-              >
-                Logout
-              </button>
-            </div>
-          </div>
+        <div className="lg:hidden absolute top-full left-0 w-full bg-cream-50/95 backdrop-blur-xl border-b border-cream-200 shadow-warm-lg p-5 space-y-2 animate-fade-in">
+          {navigationItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block w-full p-4 rounded-2xl text-sm font-semibold transition-all ${
+                isActivePath(item.path) 
+                  ? 'bg-forest-500 text-cream-50' 
+                  : 'text-forest-500/60 hover:bg-cream-200'
+              }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+          <button
+            onClick={logout}
+            className="w-full mt-3 p-4 text-left text-sm font-semibold text-red-500 border-t border-cream-200 flex justify-between items-center"
+          >
+            Sign out
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          </button>
         </div>
       )}
     </nav>

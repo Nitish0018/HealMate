@@ -12,14 +12,13 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'PATIENT', // Default to PATIENT
+    role: 'PATIENT',
   });
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, isAuthenticated, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && role && !authLoading) {
       if (role === 'PATIENT') {
@@ -36,7 +35,6 @@ const RegisterPage = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (formError) {
       setFormError('');
     }
@@ -85,20 +83,13 @@ const RegisterPage = () => {
     setIsSubmitting(true);
     
     try {
-      // Step 1: Register with Firebase
       await firebaseRegister(formData.email, formData.password);
-      
-      // Step 2: Register user in backend
       await registerUser({
         email: formData.email,
         name: formData.name,
         role: formData.role,
       });
-      
-      // Step 3: Log in the user
       await login(formData.email, formData.password);
-      
-      // Step 4: Navigate to appropriate dashboard
       if (formData.role === 'PATIENT') {
         navigate(ROUTES.PATIENT_DASHBOARD);
       } else if (formData.role === 'DOCTOR') {
@@ -107,7 +98,6 @@ const RegisterPage = () => {
     } catch (err) {
       console.error('Registration failed:', err);
       
-      // Map error codes to user-friendly messages
       let errorMessage = 'Registration failed. Please try again.';
       
       if (err.code === 'auth/email-already-in-use') {
@@ -128,145 +118,172 @@ const RegisterPage = () => {
     }
   };
 
+  const roles = [
+    { value: 'PATIENT', label: 'Patient', desc: 'Track your medications & health' },
+    { value: 'DOCTOR', label: 'Doctor', desc: 'Monitor patients & insights' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-5">
+      {/* Decorative background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-forest-50/40 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full bg-gold-50/60 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md animate-fade-in">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-blue-600 hover:text-blue-700 transition-colors mb-2">HealMate</h1>
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-flex items-center gap-3 group" id="register-logo">
+            <div className="w-12 h-12 bg-forest-500 rounded-full flex items-center justify-center text-cream-50 shadow-warm group-hover:scale-105 transition-transform">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <span className="font-serif text-3xl text-forest-500">HealMate</span>
           </Link>
-          <p className="text-gray-600">Create your account</p>
+          <p className="mt-4 text-forest-500/50 text-base font-medium">
+            Begin your path to better health.
+          </p>
         </div>
 
-        {/* Error Message */}
-        {formError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm">{formError}</p>
-          </div>
-        )}
+        {/* Card */}
+        <div className="card-warm">
+          {/* Error Message */}
+          {formError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl" id="register-error">
+              <p className="text-red-600 text-sm font-medium">{formError}</p>
+            </div>
+          )}
 
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Name Field */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="John Doe"
-              disabled={isSubmitting}
-              autoComplete="name"
-            />
-          </div>
+          {/* Registration Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name */}
+            <div>
+              <label htmlFor="name" className="label-warm">Full Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                className="input-warm"
+                placeholder="Your full name"
+                disabled={isSubmitting}
+                autoComplete="name"
+              />
+            </div>
 
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="you@example.com"
-              disabled={isSubmitting}
-              autoComplete="email"
-            />
-          </div>
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="label-warm">Email Address</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="input-warm"
+                placeholder="you@example.com"
+                disabled={isSubmitting}
+                autoComplete="email"
+              />
+            </div>
 
-          {/* Role Selection */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-              I am a
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white"
-              disabled={isSubmitting}
-            >
-              <option value="PATIENT">Patient</option>
-              <option value="DOCTOR">Doctor</option>
-            </select>
-          </div>
+            {/* Role Selection — Card-style toggle */}
+            <div>
+              <label className="label-warm">I am a</label>
+              <div className="grid grid-cols-2 gap-3">
+                {roles.map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: r.value })}
+                    className={`p-4 rounded-2xl border-2 text-left transition-all duration-300 ${
+                      formData.role === r.value
+                        ? 'border-forest-500 bg-forest-50'
+                        : 'border-cream-200 bg-cream-50 hover:border-cream-300'
+                    }`}
+                    disabled={isSubmitting}
+                  >
+                    <span className={`text-sm font-semibold block ${
+                      formData.role === r.value ? 'text-forest-500' : 'text-forest-500/50'
+                    }`}>{r.label}</span>
+                    <span className="text-[11px] text-forest-500/30 mt-0.5 block">{r.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          {/* Password Field */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="At least 6 characters"
-              disabled={isSubmitting}
-              autoComplete="new-password"
-            />
-          </div>
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="label-warm">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="input-warm"
+                placeholder="At least 6 characters"
+                disabled={isSubmitting}
+                autoComplete="new-password"
+              />
+            </div>
 
-          {/* Confirm Password Field */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="Re-enter your password"
-              disabled={isSubmitting}
-              autoComplete="new-password"
-            />
-          </div>
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="label-warm">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="input-warm"
+                placeholder="Re-enter your password"
+                disabled={isSubmitting}
+                autoComplete="new-password"
+              />
+            </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {isSubmitting ? (
-              <>
-                <LoadingSpinner size="sm" />
-                <span className="ml-2">Creating account...</span>
-              </>
-            ) : (
-              'Create Account'
-            )}
-          </button>
-        </form>
-
-        {/* Login Link */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            Already have an account?{' '}
+            {/* Submit */}
             <button
-              onClick={() => navigate(ROUTES.LOGIN)}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              type="submit"
               disabled={isSubmitting}
+              id="register-submit"
+              className="w-full btn-pill-primary py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LoadingSpinner size="sm" color="border-forest-500" />
+                  Creating account...
+                </span>
+              ) : (
+                <>
+                  Create Account
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
+              )}
             </button>
-          </p>
+          </form>
+
+          {/* Login Link */}
+          <div className="mt-8 text-center">
+            <p className="text-forest-500/40 text-sm">
+              Already have an account?{' '}
+              <button
+                onClick={() => navigate(ROUTES.LOGIN)}
+                className="text-forest-500 font-semibold hover:text-forest-300 transition-colors"
+                disabled={isSubmitting}
+                id="register-login-link"
+              >
+                Sign in →
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>

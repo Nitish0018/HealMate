@@ -6,6 +6,7 @@ import OfflineBanner from './components/OfflineBanner';
 import PatientDashboard from './pages/PatientDashboard';
 import PatientDetailView from './pages/PatientDetailView';
 import DoctorDashboard from './pages/DoctorDashboard';
+import CaregiverDashboard from './pages/CaregiverDashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
@@ -74,6 +75,18 @@ function App() {
               } 
             />
             
+            {/* Caregiver routes - protected with CAREGIVER role */}
+            <Route
+              path={ROUTES.CAREGIVER_DASHBOARD}
+              element={
+                <ProtectedRoute requiredRole="CAREGIVER">
+                  <ErrorBoundary section="Caregiver Dashboard">
+                    <CaregiverDashboard />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
             {/* Home route handles redirection based on auth state */}
             <Route path="/" element={<Home />} />
             

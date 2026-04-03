@@ -4,18 +4,12 @@ import { ROUTES } from '../constants/routes';
 
 /**
  * UnauthorizedPage Component
- * Displays when a user tries to access a route they don't have permission for
- * Shows appropriate message and navigation link based on user's role
- * 
- * Validates Requirements 2.1, 2.2:
- * - Patients cannot access doctor-only routes
- * - Doctors cannot access patient-only routes
+ * Raus-inspired: warm, minimalist error state
  */
 const UnauthorizedPage = () => {
   const { role, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Determine the correct dashboard route based on user's role
   const getDashboardRoute = () => {
     if (role === 'PATIENT') {
       return ROUTES.PATIENT_DASHBOARD;
@@ -25,7 +19,6 @@ const UnauthorizedPage = () => {
     return ROUTES.LOGIN;
   };
 
-  // Get role-specific message
   const getRoleMessage = () => {
     if (role === 'PATIENT') {
       return 'This page is only accessible to doctors.';
@@ -40,17 +33,22 @@ const UnauthorizedPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8 text-center">
+    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-5">
+      {/* Decorative */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-red-50/30 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-gold-50/40 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 card-warm w-full max-w-md text-center animate-fade-in">
         {/* Icon */}
-        <div className="mb-6">
-          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+        <div className="mb-8">
+          <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
             <svg
-              className="w-8 h-8 text-red-600"
+              className="w-7 h-7 text-compliance-low"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 strokeLinecap="round"
@@ -63,34 +61,35 @@ const UnauthorizedPage = () => {
         </div>
 
         {/* Header */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">
+        <h1 className="font-serif text-3xl text-forest-500 mb-3">
           Access Denied
         </h1>
 
         {/* Message */}
-        <p className="text-gray-600 mb-8">
+        <p className="text-forest-500/40 mb-8 font-light">
           {getRoleMessage()}
         </p>
 
-        {/* Navigation Button */}
+        {/* Navigation */}
         {isAuthenticated && role ? (
           <button
             onClick={handleNavigateToDashboard}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+            className="w-full btn-pill-primary py-4"
+            id="unauthorized-dashboard-btn"
           >
-            Go to {role === 'PATIENT' ? 'Patient' : 'Doctor'} Dashboard
+            Go to {role === 'PATIENT' ? 'Patient' : 'Doctor'} Dashboard →
           </button>
         ) : (
           <button
             onClick={() => navigate(ROUTES.LOGIN)}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+            className="w-full btn-pill-primary py-4"
+            id="unauthorized-login-btn"
           >
-            Go to Login
+            Go to Sign In →
           </button>
         )}
 
-        {/* Additional Help Text */}
-        <p className="mt-6 text-sm text-gray-500">
+        <p className="mt-6 text-sm text-forest-500/30">
           If you believe this is an error, please contact support.
         </p>
       </div>

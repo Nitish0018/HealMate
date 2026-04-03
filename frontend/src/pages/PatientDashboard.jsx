@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Navigation from '../components/Navigation';
 import MedicationSchedule from '../components/MedicationSchedule';
@@ -8,6 +8,10 @@ import ErrorMessage from '../components/ErrorMessage';
 import AddMedicationModal from '../components/AddMedicationModal';
 import { addMedication } from '../services/medicationService';
 
+/**
+ * PatientDashboard Component
+ * Raus-inspired: warm, nature-luxe, editorial design with generous whitespace
+ */
 const PatientDashboard = () => {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -15,7 +19,13 @@ const PatientDashboard = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Handle medication intake logging
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
   const handleLogIntake = async (medicationId) => {
     try {
       setError(null);
@@ -31,12 +41,11 @@ const PatientDashboard = () => {
       };
 
       await logMedicationIntake(logData);
-      
-      setSuccessMessage('Medication logged successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setSuccessMessage('Medication logged — wonderful work today.');
+      setTimeout(() => setSuccessMessage(null), 4000);
     } catch (err) {
       console.error('Error logging medication:', err);
-      setError(err.response?.data?.message || 'Failed to log medication intake');
+      setError("We couldn't log that right now. We'll try again shortly.");
     }
   };
 
@@ -44,28 +53,14 @@ const PatientDashboard = () => {
     try {
       setError(null);
       await addMedication(medicationData);
-      setSuccessMessage('New medication added to your schedule!');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setSuccessMessage('New medication added to your care plan.');
+      setTimeout(() => setSuccessMessage(null), 4000);
       setIsModalOpen(false);
-      // Trigger update of MedicationSchedule by incrementing a key if needed,
-      // but for now let's hope it refetches or user refreshes.
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add medication');
+      setError('Unable to add medication. Please check your connection.');
     }
   };
 
-  // Handle date selection
-  const handleDateChange = (event) => {
-    const newDate = new Date(event.target.value);
-    setSelectedDate(newDate);
-  };
-
-  // Format date for input
-  const formatDateForInput = (date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  // Get date navigation buttons
   const navigateDate = (direction) => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + direction);
@@ -73,183 +68,145 @@ const PatientDashboard = () => {
   };
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
-  const isPastDate = selectedDate < new Date().setHours(0, 0, 0, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream-100">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {user?.displayName || user?.email}
-            </h1>
-            <p className="mt-2 text-gray-600">
-              Track your medications and monitor your adherence progress
-            </p>
+      <main className="max-w-7xl mx-auto px-5 sm:px-8 py-8 lg:py-12">
+        {/* Hero Section — Raus editorial style */}
+        <div className="relative overflow-hidden bg-forest-500 rounded-[2.5rem] lg:rounded-[3.5rem] p-8 sm:p-12 lg:p-16 mb-12 animate-fade-in">
+          {/* Decorative organic shapes */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-forest-400/30 rounded-full -mr-28 -mt-28 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 w-60 h-60 bg-gold-300/10 rounded-full -mb-24 blur-2xl" />
+          
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
+                <div className="w-2 h-2 rounded-full bg-compliance-high animate-pulse" />
+                <span className="text-cream-100/80 text-xs font-medium tracking-wider uppercase">
+                  Health Monitor Active
+                </span>
+              </div>
+              
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-cream-50 leading-[1.1] tracking-tight">
+                {greeting}, <br />
+                <span className="text-gold-300">{user?.displayName || user?.email?.split('@')[0]}</span>
+              </h1>
+              
+              <p className="mt-6 text-cream-100/60 text-lg font-light max-w-lg leading-relaxed">
+                Your daily wellness rhythm matters. Let's make sure every dose is taken care of today.
+              </p>
+              
+              <div className="mt-10 flex flex-wrap gap-4">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  id="add-medication-btn"
+                  className="btn-pill-primary"
+                >
+                  Add Medication
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Daily Progress Gauge */}
+            <div className="flex flex-col items-center justify-center p-8 bg-white/8 backdrop-blur-md border border-white/10 rounded-[2.5rem] min-w-[220px]">
+              <div className="relative w-28 h-28 flex items-center justify-center">
+                 <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="56" cy="56" r="46" stroke="rgba(255,255,255,0.08)" strokeWidth="8" fill="none" />
+                    <circle cx="56" cy="56" r="46" stroke="#F4B42D" strokeWidth="8" fill="none" strokeDasharray="289" strokeDashoffset={289 * (1 - 0.75)} strokeLinecap="round" />
+                 </svg>
+                 <span className="absolute font-serif text-3xl text-cream-50">75%</span>
+              </div>
+              <p className="mt-4 text-cream-100/50 text-xs font-medium uppercase tracking-widest">Daily Progress</p>
+            </div>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all hover:shadow-lg active:scale-95"
-          >
-            <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Medication
-          </button>
         </div>
 
-        {/* Global Messages */}
+        {/* Status Messages */}
         {error && (
-          <div className="mb-6">
-            <ErrorMessage 
-              message={error} 
-              onRetry={() => setError(null)}
-            />
+          <div className="mb-8 animate-fade-in">
+            <ErrorMessage message={error} onRetry={() => setError(null)} />
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <div className="mb-8 card-warm-sm flex items-center gap-4 border-l-4 border-l-compliance-high animate-fade-in">
+            <div className="w-10 h-10 bg-forest-50 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg className="h-5 w-5 text-compliance-high" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span className="text-green-800 font-medium">{successMessage}</span>
             </div>
+            <span className="text-forest-500 font-medium text-sm">{successMessage}</span>
           </div>
         )}
 
-        {/* Main Content Grid - Responsive: stack on mobile, side-by-side on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Left Column - Medication Schedule */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Date Selector */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Select Date</h2>
-              
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                {/* Previous Day Button - Touch-friendly 44x44px minimum */}
-                <button
-                  onClick={() => navigateDate(-1)}
-                  className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 border border-gray-300 rounded-md text-gray-500 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  aria-label="Previous day"
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Medication Timeline */}
+          <div className="lg:col-span-8 space-y-8">
+            <div className="card-warm">
+               <div className="flex items-center justify-between mb-8">
+                  <h2 className="font-serif text-2xl text-forest-500 flex items-center">
+                    <span className="w-1.5 h-7 bg-gold-300 rounded-full mr-3" />
+                    Medication Timeline
+                  </h2>
+                  <div className="flex items-center gap-1 bg-cream-100 p-1.5 rounded-full">
+                    <button onClick={() => navigateDate(-1)} className="p-2.5 hover:bg-white hover:shadow-warm rounded-full transition-all" id="date-prev">
+                      <svg className="w-4 h-4 text-forest-500/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <span className="px-5 text-sm font-medium text-forest-500/60 select-none min-w-[140px] text-center">
+                      {isToday ? 'Today' : selectedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                    <button onClick={() => navigateDate(1)} className="p-2.5 hover:bg-white hover:shadow-warm rounded-full transition-all" id="date-next">
+                      <svg className="w-4 h-4 text-forest-500/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </div>
+               </div>
+               
+               <MedicationSchedule 
+                 date={selectedDate}
+                 onLogIntake={handleLogIntake}
+               />
+            </div>
+          </div>
 
-                {/* Date Input - Touch-friendly height */}
-                <div className="flex-1">
-                  <input
-                    type="date"
-                    value={formatDateForInput(selectedDate)}
-                    onChange={handleDateChange}
-                    className="block w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                  />
+          {/* Right Column: Health Analytics & Tips */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="lg:sticky lg:top-24 space-y-8">
+              {/* Analytics Card */}
+              <div className="card-warm relative overflow-hidden">
+                <div className="absolute -top-8 -right-8 w-32 h-32 bg-forest-50 rounded-full opacity-30" />
+                
+                <div className="relative z-10">
+                  <h3 className="font-serif text-xl text-forest-500 mb-6">Health Analytics</h3>
+                  <AdherenceVisualization />
+                  
+                  <div className="mt-8 space-y-4">
+                    {/* Knowledge tip */}
+                    <div className="p-5 bg-cream-100 rounded-2xl border border-cream-200/50 hover:border-forest-100 transition-all cursor-pointer group">
+                      <p className="text-[10px] font-semibold text-forest-300 uppercase tracking-widest mb-1.5">Knowledge Base</p>
+                      <h4 className="font-semibold text-forest-500 text-sm group-hover:text-forest-400 transition-colors">Why consistent timing matters</h4>
+                      <p className="text-xs text-forest-500/40 mt-1.5 line-clamp-2 leading-relaxed">Maintaining steady blood levels ensures optimal efficacy...</p>
+                    </div>
+                    
+                    {/* Health Reminder */}
+                    <div className="p-6 bg-gold-50 rounded-[1.5rem] border border-gold-100/50">
+                      <h4 className="font-semibold text-forest-500 text-xs uppercase tracking-widest mb-3">Health Reminder</h4>
+                      <p className="text-sm text-forest-500/70 leading-relaxed font-light">
+                        Stay hydrated throughout the day. Water helps your body absorb medications and reduces side effects.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Next Day Button - Touch-friendly 44x44px minimum */}
-                <button
-                  onClick={() => navigateDate(1)}
-                  className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 border border-gray-300 rounded-md text-gray-500 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  aria-label="Next day"
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-
-                {/* Today Button - Touch-friendly 44x44px minimum */}
-                {!isToday && (
-                  <button
-                    onClick={() => setSelectedDate(new Date())}
-                    className="inline-flex items-center justify-center min-h-[44px] px-3 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors whitespace-nowrap"
-                  >
-                    Today
-                  </button>
-                )}
-              </div>
-
-              {/* Date Status Indicators */}
-              <div className="mt-4 flex items-center space-x-4 text-sm">
-                {isToday && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Today
-                  </span>
-                )}
-                {isPastDate && !isToday && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    Past Date
-                  </span>
-                )}
-                {selectedDate > new Date() && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Future Date
-                  </span>
-                )}
               </div>
             </div>
-
-            {/* Medication Schedule */}
-            <MedicationSchedule 
-              date={selectedDate}
-              onLogIntake={handleLogIntake}
-            />
-          </div>
-
-          {/* Right Column - Adherence Visualization */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-8">
-              <AdherenceVisualization />
-            </div>
           </div>
         </div>
+      </main>
 
-        {/* Quick Stats - Responsive: stack on mobile, 3 columns on tablet+ */}
-        <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-2">
-              {isToday ? 'Today' : selectedDate.toLocaleDateString()}
-            </div>
-            <div className="text-sm text-gray-600">Selected Date</div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="text-2xl font-bold text-green-600 mb-2">
-              Active
-            </div>
-            <div className="text-sm text-gray-600">Medication Tracking</div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="text-2xl font-bold text-purple-600 mb-2">
-              {user?.role || 'Patient'}
-            </div>
-            <div className="text-sm text-gray-600">Account Type</div>
-          </div>
-        </div>
-
-        {/* Help Section */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-blue-900 mb-2">
-            How to use your dashboard
-          </h3>
-          <div className="text-blue-800 space-y-2 text-sm">
-            <p>• Use the date selector to view medications for different days</p>
-            <p>• Click "Mark as Taken" when you take your medications</p>
-            <p>• Monitor your adherence progress in the right panel</p>
-            <p>• Green indicators show good adherence (≥80%)</p>
-            <p>• Yellow indicators suggest room for improvement (60-79%)</p>
-            <p>• Red indicators need attention (&lt;60%)</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Modals */}
       <AddMedicationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -7,7 +7,7 @@ import ErrorMessage from './ErrorMessage';
 
 /**
  * PatientList Component
- * Displays searchable, filterable list of patients for doctors
+ * Displays searchable, filterable list of patients for doctors with premium UI
  * 
  * @param {Object} props
  * @param {Function} props.onPatientSelect - Callback when patient is selected
@@ -29,11 +29,12 @@ const PatientList = ({ onPatientSelect }) => {
         const patientsData = await getPatientsList();
         
         // Add mock compliance data since backend doesn't provide it yet
+        // Consistently with Dashboard stats
         const patientsWithCompliance = patientsData.map((patient) => ({
           ...patient,
-          complianceScore: Math.floor(Math.random() * 40) + 60, // Random 60-100%
-          lastActivity: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(), // Random last 7 days
-          consecutiveMissedDoses: Math.floor(Math.random() * 5) // Random 0-4 missed doses
+          complianceScore: patient.complianceScore || Math.floor(Math.random() * 41) + 55,
+          lastActivity: patient.lastActivity || new Date(Date.now() - Math.random() * 5 * 24 * 60 * 60 * 1000).toISOString(),
+          consecutiveMissedDoses: patient.consecutiveMissedDoses || (Math.random() > 0.8 ? Math.floor(Math.random() * 3) + 1 : 0)
         }));
 
         setPatients(patientsWithCompliance);
@@ -51,29 +52,39 @@ const PatientList = ({ onPatientSelect }) => {
   // Filter and sort patients based on search query
   const filteredAndSortedPatients = useMemo(() => {
     let filtered = filterPatientsByName(patients, searchQuery);
-    return sortPatientsByCompliance(filtered, true); // Sort ascending (lowest first)
+    return sortPatientsByCompliance(filtered, true); // Sort ascending (lowest first as priority)
   }, [patients, searchQuery]);
 
   // Handle patient selection
   const handlePatientClick = (patient) => {
+    const id = patient.id || patient._id;
     if (onPatientSelect) {
-      onPatientSelect(patient.id || patient._id);
+      onPatientSelect(id);
     } else {
-      // Navigate to patient detail view
-      navigate(ROUTES.getPatientDetailRoute(patient.id || patient._id));
+      navigate(ROUTES.getPatientDetailRoute(id));
     }
   };
 
-  // Handle search input change
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  // Get compliance color class
-  const getComplianceColor = (score) => {
-    if (score >= 80) return 'text-compliance-high bg-green-50 border-green-200';
-    if (score >= 60) return 'text-compliance-medium bg-yellow-50 border-yellow-200';
-    return 'text-compliance-low bg-red-50 border-red-200';
+  // Get compliance styling
+  const getComplianceStyle = (score) => {
+    if (score >= 80) return { 
+      bg: 'bg-green-50', 
+      text: 'text-green-700', 
+      border: 'border-green-200',
+      dot: 'bg-green-500'
+    };
+    if (score >= 60) return { 
+      bg: 'bg-yellow-50', 
+      text: 'text-yellow-700', 
+      border: 'border-yellow-200',
+      dot: 'bg-yellow-500'
+    };
+    return { 
+      bg: 'bg-red-50', 
+      text: 'text-red-700', 
+      border: 'border-red-200',
+      dot: 'bg-red-500'
+    };
   };
 
   // Format last activity date
@@ -85,158 +96,149 @@ const PatientList = ({ onPatientSelect }) => {
     
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
-  };
-
-  const handleRetry = () => {
-    setError(null);
-    setLoading(true);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Patient List</h3>
-        <div className="flex justify-center py-8">
-          <LoadingSpinner size="lg" />
-        </div>
+      <div className="bg-white rounded-3xl p-8 flex flex-col items-center justify-center min-h-[400px]">
+        <LoadingSpinner size="lg" />
+        <p className="mt-4 text-gray-500 font-medium">Loading clinical records...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Patient List</h3>
-        <ErrorMessage message={error} onRetry={handleRetry} />
+      <div className="bg-white rounded-3xl p-8">
+        <ErrorMessage message={error} onRetry={() => setLoading(true)} />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-          Patient List ({filteredAndSortedPatients.length})
-        </h3>
+    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900">Patient Directory</h3>
+          <p className="text-sm text-gray-500 mt-1">Found {filteredAndSortedPatients.length} patients in your care</p>
+        </div>
         
-        {/* Search Input - Touch-friendly */}
-        <div className="relative w-full sm:max-w-xs">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="relative w-full sm:max-w-xs group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
           <input
             type="text"
-            placeholder="Search patients..."
+            placeholder="Search by name or email..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            className="block w-full min-h-[44px] pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl leading-5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium"
           />
         </div>
       </div>
 
-      {/* Patient List */}
-      {filteredAndSortedPatients.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-gray-500 mb-2">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.196-2.121M9 20H4v-2a3 3 0 015.196-2.121M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <p className="text-gray-500">
-            {searchQuery ? 'No patients found matching your search' : 'No patients assigned'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredAndSortedPatients.map((patient) => (
-            <div
-              key={patient.id || patient._id}
-              onClick={() => handlePatientClick(patient)}
-              className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer min-h-[80px] flex items-center"
-            >
-              <div className="flex items-center justify-between w-full gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 sm:space-x-3">
-                    {/* Patient Avatar */}
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm sm:text-base font-medium">
-                        {(patient.name || patient.email).charAt(0).toUpperCase()}
+      <div className="overflow-x-auto -mx-6 px-6">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="pb-4 pt-0 font-semibold text-gray-400 text-xs uppercase tracking-wider">Patient</th>
+              <th className="pb-4 pt-0 font-semibold text-gray-400 text-xs uppercase tracking-wider text-center">Status</th>
+              <th className="pb-4 pt-0 font-semibold text-gray-400 text-xs uppercase tracking-wider text-center">Adherence</th>
+              <th className="pb-4 pt-0 font-semibold text-gray-400 text-xs uppercase tracking-wider text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {filteredAndSortedPatients.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="py-12 text-center text-gray-400 font-medium">
+                  No patients found matching your criteria.
+                </td>
+              </tr>
+            ) : (
+              filteredAndSortedPatients.map((patient) => {
+                const style = getComplianceStyle(patient.complianceScore);
+                return (
+                  <tr 
+                    key={patient.id || patient._id} 
+                    className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
+                    onClick={() => handlePatientClick(patient)}
+                  >
+                    <td className="py-5">
+                      <div className="flex items-center">
+                        <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-100 group-hover:scale-110 transition-transform">
+                          {(patient.name || patient.email || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-bold text-gray-900">{patient.name || 'Anonymous User'}</div>
+                          <div className="text-xs text-gray-500">{patient.email}</div>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Patient Info */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm sm:text-base font-medium text-gray-900 truncate">
-                        {patient.name || 'Unknown Patient'}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-gray-600 truncate">
-                        {patient.email}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Last activity: {formatLastActivity(patient.lastActivity)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Compliance Score and Arrow */}
-                <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                  <div className={`px-2 sm:px-3 py-1 rounded-full border text-xs sm:text-sm font-medium whitespace-nowrap ${getComplianceColor(patient.complianceScore)}`}>
-                    {patient.complianceScore}%
-                  </div>
-                  
-                  {/* Arrow Icon */}
-                  <svg className="h-5 w-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-              
-              {/* Additional Info - Show on separate line on mobile */}
-              {patient.consecutiveMissedDoses > 0 && (
-                <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-red-600 w-full">
-                  <svg className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {patient.consecutiveMissedDoses} consecutive missed doses
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                    </td>
+                    <td className="py-5 text-center">
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.text} ${style.border}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full mr-2 ${style.dot} animate-pulse`} />
+                        {patient.complianceScore >= 80 ? 'Stable' : patient.complianceScore >= 60 ? 'Monitoring' : 'Critical'}
+                      </div>
+                      <div className="text-[10px] text-gray-400 mt-1 uppercase font-bold">
+                        Activity: {formatLastActivity(patient.lastActivity)}
+                      </div>
+                    </td>
+                    <td className="py-5">
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 relative">
+                          {/* Small circular progress indicator */}
+                          <svg className="w-full h-full" viewBox="0 0 36 36">
+                            <path
+                              className="text-gray-100 stroke-current"
+                              strokeWidth="3.5"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <path
+                              className={`${style.text} stroke-current`}
+                              strokeWidth="3.5"
+                              strokeDasharray={`${patient.complianceScore}, 100`}
+                              strokeLinecap="round"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <text x="18" y="20.35" className="text-[10px] font-bold fill-current" textAnchor="middle">{patient.complianceScore}%</text>
+                          </svg>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-5 text-right">
+                      <button className="inline-flex items-center justify-center p-2 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 shadow-sm hover:shadow-md">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Summary Stats */}
       {filteredAndSortedPatients.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="grid grid-cols-3 gap-4 text-center text-sm">
-            <div>
-              <div className="font-medium text-gray-900">
-                {filteredAndSortedPatients.filter(p => p.complianceScore >= 80).length}
-              </div>
-              <div className="text-green-600">High Compliance</div>
-            </div>
-            <div>
-              <div className="font-medium text-gray-900">
-                {filteredAndSortedPatients.filter(p => p.complianceScore >= 60 && p.complianceScore < 80).length}
-              </div>
-              <div className="text-yellow-600">Medium Compliance</div>
-            </div>
-            <div>
-              <div className="font-medium text-gray-900">
-                {filteredAndSortedPatients.filter(p => p.complianceScore < 60).length}
-              </div>
-              <div className="text-red-600">Low Compliance</div>
-            </div>
-          </div>
+        <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
+           <div className="text-sm font-medium text-gray-400">
+             Showing <span className="text-gray-900 font-bold">{filteredAndSortedPatients.length}</span> results
+           </div>
+           <div className="flex space-x-2">
+             <button className="px-4 py-2 text-sm font-bold text-gray-500 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">Previous</button>
+             <button className="px-4 py-2 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md shadow-blue-100 transition-all">Next</button>
+           </div>
         </div>
       )}
     </div>
   );
 };
 
-export default PatientList;
+export default PatientList;
