@@ -1,51 +1,19 @@
 const mongoose = require('mongoose');
 
-const adherenceLogSchema = new mongoose.Schema(
-  {
-    patient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    medication: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Medication',
-      required: true,
-    },
-    scheduledTime: {
-      type: Date,
-      required: true,
-    },
-    takenAt: {
-      type: Date,
-    },
-    status: {
-      type: String,
-      enum: ['taken', 'missed', 'late', 'skipped'],
-      default: 'missed',
-    },
-    delayMinutes: {
-      type: Number,
-      default: 0, // How many minutes late the dose was taken
-    },
-    notes: { type: String, default: '' },
-
-    // Verification (future: camera-based pill detection)
-    verified: { type: Boolean, default: false },
-    verificationMethod: {
-      type: String,
-      enum: ['manual', 'camera', 'caregiver'],
-      default: 'manual',
-    },
-
-    // AI prediction at the time of this log
-    predictedRisk: { type: Number }, // 0-100 risk score at time of scheduling
-  },
-  { timestamps: true }
-);
-
-// Compound index for efficient queries
-adherenceLogSchema.index({ patient: 1, scheduledTime: -1 });
-adherenceLogSchema.index({ medication: 1, scheduledTime: -1 });
+const adherenceLogSchema = new mongoose.Schema({
+  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  mimic_prescription_row_id: { type: Number, required: true }, // Links to the exact MIMIC-III prescription
+  mimic_subject_id: { type: Number }, // To easily query logs by MIMIC patient
+  
+  scheduled_time: { type: Date, required: true },
+  status: { type: String, enum: ['TAKEN', 'MISSED', 'DELAYED', 'UPCOMING'], default: 'UPCOMING' },
+  taken_time: { type: Date, default: null }, // Actual time they hit "taken"
+  
+  // AI related fields (for phase 4)
+  ai_risk_score: { type: Number, default: 0 },
+  is_simulated: { type: Boolean, default: true } // Since we don't have real app users yet, these will be seeded
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model('AdherenceLog', adherenceLogSchema);

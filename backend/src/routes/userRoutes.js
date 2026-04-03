@@ -1,12 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
-const { getProfile, updateProfile, getMyPatients, assignDoctor, searchUsers } = require('../controllers/userController');
+const { getPatientsList, getClinicalPatientProfile } = require('../controllers/userController');
+const { verifyToken } = require('../middleware/authMiddleware');
 
-router.get('/profile', protect, getProfile);
-router.put('/profile', protect, updateProfile);
-router.get('/patients', protect, authorize('doctor', 'caregiver'), getMyPatients);
-router.post('/assign-doctor', protect, authorize('patient'), assignDoctor);
-router.get('/search', protect, searchUsers);
+router.get('/patients', verifyToken, getPatientsList);
+router.get('/patients/:subjectId/clinical', verifyToken, getClinicalPatientProfile);
 
 module.exports = router;

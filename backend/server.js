@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 const connectDB = require('./src/config/db');
-const { initializeFirebase } = require('./src/config/firebase');
+require('./src/config/firebase'); // Runs the initialization payload automatically
 const errorHandler = require('./src/middleware/errorHandler');
 
 // Route imports
@@ -18,7 +18,6 @@ const adherenceRoutes = require('./src/routes/adherenceRoutes');
 // ── Init ──────────────────────────────────────────────
 const app = express();
 connectDB();
-initializeFirebase();
 
 // ── Global Middleware ─────────────────────────────────
 app.use(helmet());

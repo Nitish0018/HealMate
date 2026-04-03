@@ -5,21 +5,21 @@ Based on the Product Requirements Document (PRD) and Tech Stack, here is a struc
 ## Phase 1: Project Setup & Architecture
 - [ ] Initialize frontend repository (React.js + Tailwind CSS)
 - [ ] Initialize backend repository (Node.js + Express.js)
-- [ ] Set up database cluster (MongoDB Atlas) and basic connection
+- [x] Set up database cluster (MongoDB Atlas) and basic connection
 - [ ] Set up Firebase project for Authentication and Cloud Messaging (FCM)
 - [ ] Initialize Python environment for the AI/ML module
 
 ## Phase 2: Database & Backend Foundation
-- [ ] Design and implement MongoDB schemas:
-  - [ ] Users (Patients, Doctors, Caregivers)
-  - [ ] Medications & Schedules
-  - [ ] Adherence Logs (Intake records)
-  - [ ] AI Prediction Results / Risk Scores
-- [ ] Implement Firebase Authentication integration in the backend (JWT verification)
-- [ ] Build basic CRUD REST APIs:
-  - [ ] User profile management
-  - [ ] Medication management (add name, dosage, timing)
-  - [ ] Logging medication intake
+- [x] Design and implement MongoDB schemas:
+  - [x] Users (Patients, Doctors, Caregivers)
+  - [x] Medications & Schedules
+  - [x] Adherence Logs (Intake records)
+  - [x] AI Prediction Results / Risk Scores
+- [x] Implement Firebase Authentication integration in the backend (JWT verification)
+- [x] Build basic CRUD REST APIs:
+  - [x] User profile management
+  - [x] Medication management (add name, dosage, timing)
+  - [x] Logging medication intake
 
 ## Phase 3: Core Frontend (Patient & Doctor Views)
 - [ ] Set up routing and authentication guards (Protected Routes)

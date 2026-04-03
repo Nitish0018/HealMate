@@ -1,0 +1,8 @@
+# Ignore sensitive files
+*.log
+*.env
+*keys.js
+*config.js
+
+# Ignore firebase admin sdk json file
+healmate-c0126-firebase-adminsdk-fbsvc-4daf39ddd9.json

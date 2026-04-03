@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
-const { logIntake, getAdherenceLogs, getAdherenceStats } = require('../controllers/adherenceController');
+const { logIntake, getPatientAdherenceLogs } = require('../controllers/adherenceController');
+const { verifyToken } = require('../middleware/authMiddleware');
 
-router.post('/log', protect, logIntake);
-router.get('/', protect, getAdherenceLogs);
-router.get('/stats', protect, getAdherenceStats);
+router.post('/log', verifyToken, logIntake);
+router.get('/patient/:subjectId', verifyToken, getPatientAdherenceLogs);
 
 module.exports = router;
