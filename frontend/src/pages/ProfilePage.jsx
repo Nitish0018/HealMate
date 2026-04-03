@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import Navigation from '../components/Navigation';
+import ComingSoonModal from '../components/ComingSoonModal';
 
 /**
  * ProfilePage
@@ -15,6 +14,8 @@ const ProfilePage = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState(null);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+  const [activeFeature, setActiveFeature] = useState('');
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -126,7 +127,12 @@ const ProfilePage = () => {
                 <p className="font-medium text-forest-500">Password</p>
                 <p className="text-sm text-forest-500/40 mt-0.5">Change your account password regularly</p>
               </div>
-              <button className="btn-pill-ghost text-forest-400 hover:text-forest-500">Change</button>
+              <button 
+                onClick={() => { setActiveFeature('Password Management'); setIsComingSoonOpen(true); }}
+                className="btn-pill-ghost text-forest-400 hover:text-forest-500"
+              >
+                Change
+              </button>
             </div>
             
             <div className="flex items-center justify-between py-5">
@@ -134,11 +140,22 @@ const ProfilePage = () => {
                 <p className="font-medium text-forest-500">Two-Factor Authentication</p>
                 <p className="text-sm text-status-pending mt-0.5">Currently Disabled</p>
               </div>
-              <button className="btn-pill-ghost text-forest-400 hover:text-forest-500">Enable</button>
+              <button 
+                onClick={() => { setActiveFeature('Multi-Factor Authentication'); setIsComingSoonOpen(true); }}
+                className="btn-pill-ghost text-forest-400 hover:text-forest-500"
+              >
+                Enable
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      <ComingSoonModal 
+        isOpen={isComingSoonOpen}
+        onClose={() => setIsComingSoonOpen(false)}
+        featureName={activeFeature}
+      />
     </div>
   );
 };

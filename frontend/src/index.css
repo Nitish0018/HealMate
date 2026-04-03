@@ -92,3 +92,42 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 65, 34, 0.24);
 }
+
+/* Skeleton Loading — Raus premium */
+.skeleton {
+  @apply relative overflow-hidden bg-cream-200/50 rounded-lg;
+}
+
+.skeleton::after {
+  content: "";
+  @apply absolute inset-0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 1.8s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}

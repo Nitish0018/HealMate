@@ -7,6 +7,8 @@ import ComplianceVisualization from '../components/ComplianceVisualization';
 import MissedDoseTimeline from '../components/MissedDoseTimeline';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
+import ComingSoonModal from '../components/ComingSoonModal';
+import ContactPatientModal from '../components/ContactPatientModal';
 
 /**
  * PatientDetailView Page
@@ -20,6 +22,9 @@ const PatientDetailView = () => {
   const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [activeFeature, setActiveFeature] = useState('');
 
   // Fetch patient detail data
   useEffect(() => {
@@ -34,22 +39,23 @@ const PatientDetailView = () => {
         setLoading(true);
         setError(null);
 
-        const data = await getPatientDetail(patientId);
+        const response = await getPatientDetail(patientId);
+        const data = response.data || response;
         
-        // Ensure consistent data structure
-        const mockPatientData = {
-          patient: data.patient || {
+        // Ensure consistent data structure mapping from backend to frontend expectations
+        const mappedPatientData = {
+          patient: {
             id: patientId,
             name: data.name || 'Unknown Patient',
             email: data.email || 'patient@example.com',
             complianceScore: data.complianceScore || Math.floor(Math.random() * 41) + 55
           },
           medications: data.medications || generateMockMedications(),
-          adherenceHistory: data.adherenceHistory || [],
+          adherenceHistory: data.adherenceHistory || data.logs || [],
           missedDoses: data.missedDoses || []
         };
 
-        setPatientData(mockPatientData);
+        setPatientData(mappedPatientData);
 
       } catch (err) {
         console.error('Error fetching patient detail:', err);
@@ -129,8 +135,18 @@ const PatientDetailView = () => {
                   <span className="text-4xl font-black">{patient.complianceScore}%</span>
                 </div>
                 <div className="hidden lg:flex flex-col gap-2">
-                   <button className="px-6 py-2 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all shadow-md">Action Required</button>
-                   <button className="px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-50 transition-all">Export Data</button>
+                   <button 
+                    onClick={() => { setActiveFeature('Priority Actions'); setIsComingSoonOpen(true); }}
+                    className="px-6 py-2 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all shadow-md"
+                   >
+                    Action Required
+                   </button>
+                   <button 
+                    onClick={() => { setActiveFeature('Clinical Data Export'); setIsComingSoonOpen(true); }}
+                    className="px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-50 transition-all"
+                   >
+                    Export Data
+                   </button>
                 </div>
               </div>
             </div>
@@ -191,13 +207,13 @@ const PatientDetailView = () => {
               <div className="mt-8 space-y-3">
                 <button 
                   className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all"
-                  onClick={() => alert('Interface not connected')}
+                  onClick={() => setIsContactModalOpen(true)}
                 >
                   Contact Patient
                 </button>
                 <button 
                   className="w-full py-4 bg-white border border-gray-200 text-gray-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-all"
-                  onClick={() => alert('Interface not connected')}
+                  onClick={() => { setActiveFeature('Prescription Management'); setIsComingSoonOpen(true); }}
                 >
                   Edit Prescription
                 </button>
@@ -206,6 +222,19 @@ const PatientDetailView = () => {
           </aside>
         </div>
       </main>
+
+      <ComingSoonModal 
+        isOpen={isComingSoonOpen}
+        onClose={() => setIsComingSoonOpen(false)}
+        featureName={activeFeature}
+      />
+
+      <ContactPatientModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        patientName={patient.name}
+        patientEmail={patient.email}
+      />
     </div>
   );
 };

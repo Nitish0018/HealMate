@@ -3,6 +3,9 @@ import { useAuth } from '../hooks/useAuth';
 import Navigation from '../components/Navigation';
 import PatientList from '../components/PatientList';
 import HighRiskAlerts from '../components/HighRiskAlerts';
+import AddPatientModal from '../components/AddPatientModal';
+import BulkPatientModal from '../components/BulkPatientModal';
+import AIInsightsModal from '../components/AIInsightsModal';
 import { getPatientsList } from '../services/doctorService';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -16,28 +19,31 @@ const DoctorDashboard = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [isBulkViewOpen, setIsBulkViewOpen] = useState(false);
+  const [isAIInsightsOpen, setIsAIInsightsOpen] = useState(false);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getPatientsList();
+      
+      const patientsWithData = data.map(p => ({
+        ...p,
+        complianceScore: p.complianceScore || Math.floor(Math.random() * 41) + 55,
+      }));
+      
+      setPatients(patientsWithData);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Unable to load dashboard metrics. Reconnecting...');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getPatientsList();
-        
-        const patientsWithData = data.map(p => ({
-          ...p,
-          complianceScore: p.complianceScore || Math.floor(Math.random() * 41) + 55,
-        }));
-        
-        setPatients(patientsWithData);
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError('Unable to load dashboard metrics. Reconnecting...');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, []);
 
@@ -106,9 +112,21 @@ const DoctorDashboard = () => {
           </div>
           <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-full shadow-warm border border-cream-200/60">
             <div className="flex -space-x-2">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-cream-200" />
-              ))}
+              {patients.length > 0 ? (
+                patients.slice(0, 3).map((p, i) => (
+                  <div 
+                    key={i} 
+                    className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-forest-500 shadow-sm"
+                    style={{ backgroundColor: ['#E6F0EA', '#FAF3E0', '#FDEAEA'][i % 3] }}
+                  >
+                    {(p.name || p.email || 'P').charAt(0).toUpperCase()}
+                  </div>
+                ))
+              ) : (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-cream-200" />
+                ))
+              )}
             </div>
             <span className="text-sm font-medium text-forest-500/60">
               {stats.total} Active Patients
@@ -121,7 +139,11 @@ const DoctorDashboard = () => {
           {statCards.map((card, i) => (
             <div key={i} className="card-warm-sm hover:shadow-warm-lg transition-all duration-300 group">
               <p className="text-forest-500/40 font-medium text-sm">{card.label}</p>
-              <h3 className="font-serif text-4xl text-forest-500 mt-2">{loading ? '...' : card.value}</h3>
+              {loading ? (
+                <div className="h-10 w-16 skeleton mt-2" />
+              ) : (
+                <h3 className="font-serif text-4xl text-forest-500 mt-2">{card.value}</h3>
+              )}
               <div className={`mt-4 inline-flex items-center text-xs font-semibold ${card.badgeColor} px-3 py-1.5 rounded-full`}>
                 {card.badge}
               </div>
@@ -142,9 +164,16 @@ const DoctorDashboard = () => {
                 </div>
               </div>
               
-              <div className="flex flex-col md:flex-row items-center justify-center h-[320px]">
+              <div className="flex flex-col md:flex-row items-center justify-center h-[320px] w-full">
                 {loading ? (
-                  <LoadingSpinner size="lg" color="border-forest-500" />
+                  <div className="w-full flex flex-col md:flex-row items-center gap-8 px-4">
+                    <div className="w-60 h-60 rounded-full skeleton" />
+                    <div className="flex-1 space-y-4 w-full">
+                      <div className="h-12 w-full skeleton" />
+                      <div className="h-12 w-full skeleton" />
+                      <div className="h-12 w-full skeleton" />
+                    </div>
+                  </div>
                 ) : chartData.length > 0 ? (
                   <>
                     <div className="w-full h-full md:w-2/3">
@@ -204,7 +233,7 @@ const DoctorDashboard = () => {
           {/* Sidebar */}
           <aside className="lg:col-span-4 space-y-8">
             <section className="sticky top-24 space-y-8">
-              <HighRiskAlerts />
+              <HighRiskAlerts patients={patients} />
               
               {/* AI Insights Card */}
               <div className="bg-forest-500 rounded-[2rem] p-7 text-cream-50 shadow-warm-lg">
@@ -219,7 +248,10 @@ const DoctorDashboard = () => {
                 <p className="text-cream-100/60 text-sm leading-relaxed mb-6 font-light">
                   Based on recent patterns, 3 patients in your watchlist show early signs of fatigue and may miss upcoming doses.
                 </p>
-                <button className="w-full btn-pill bg-gold-300 text-forest-500 px-6 py-3.5 text-sm font-semibold shadow-gold hover:brightness-105">
+                <button 
+                  onClick={() => setIsAIInsightsOpen(true)}
+                  className="w-full btn-pill bg-gold-300 text-forest-500 px-6 py-3.5 text-sm font-semibold shadow-gold hover:brightness-105"
+                >
                   View Recommendations →
                 </button>
               </div>
@@ -228,10 +260,10 @@ const DoctorDashboard = () => {
               <div className="space-y-3">
                 <h4 className="label-warm ml-1">Quick Actions</h4>
                 {[
-                  { label: 'Add New Patient', icon: 'M12 4v16m8-8H4', bgColor: 'bg-forest-50', textColor: 'text-forest-400' },
-                  { label: 'Bulk Patient View', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2', bgColor: 'bg-gold-50', textColor: 'text-gold-400' },
+                  { label: 'Add New Patient', icon: 'M12 4v16m8-8H4', bgColor: 'bg-forest-50', textColor: 'text-forest-400', onClick: () => setIsAddPatientModalOpen(true) },
+                  { label: 'Bulk Patient View', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2', bgColor: 'bg-gold-50', textColor: 'text-gold-400', onClick: () => setIsBulkViewOpen(true) },
                 ].map((action, i) => (
-                  <button key={i} className="w-full flex items-center justify-between p-4 bg-white border border-cream-200/60 rounded-2xl hover:shadow-warm transition-all duration-300 group">
+                  <button key={i} onClick={action.onClick} className="w-full flex items-center justify-between p-4 bg-white border border-cream-200/60 rounded-2xl hover:shadow-warm transition-all duration-300 group">
                     <div className="flex items-center gap-3">
                       <div className={`p-2.5 ${action.bgColor} ${action.textColor} rounded-xl group-hover:scale-105 transition-transform`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,6 +282,24 @@ const DoctorDashboard = () => {
           </aside>
         </div>
       </main>
+
+      <AddPatientModal
+        isOpen={isAddPatientModalOpen}
+        onClose={() => setIsAddPatientModalOpen(false)}
+        onAdd={() => fetchDashboardData()}
+      />
+
+      <BulkPatientModal
+        isOpen={isBulkViewOpen}
+        onClose={() => setIsBulkViewOpen(false)}
+        patients={patients}
+        loading={loading}
+      />
+
+      <AIInsightsModal
+        isOpen={isAIInsightsOpen}
+        onClose={() => setIsAIInsightsOpen(false)}
+      />
     </div>
   );
 };

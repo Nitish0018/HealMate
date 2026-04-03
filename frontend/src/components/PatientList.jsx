@@ -102,9 +102,29 @@ const PatientList = ({ onPatientSelect }) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-3xl p-8 flex flex-col items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
-        <p className="mt-4 text-gray-500 font-medium">Loading clinical records...</p>
+      <div className="bg-white rounded-[2rem] p-8 border border-cream-200/60 shadow-warm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+          <div>
+            <div className="h-8 w-48 skeleton mb-2" />
+            <div className="h-4 w-32 skeleton" />
+          </div>
+          <div className="h-12 w-full sm:max-w-xs skeleton rounded-2xl" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between py-5 border-b border-cream-100">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl skeleton" />
+                <div className="space-y-2">
+                  <div className="h-4 w-32 skeleton" />
+                  <div className="h-3 w-48 skeleton" />
+                </div>
+              </div>
+              <div className="h-8 w-24 skeleton rounded-full" />
+              <div className="h-12 w-12 rounded-full skeleton" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

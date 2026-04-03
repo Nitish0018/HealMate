@@ -9,7 +9,7 @@ import ErrorMessage from './ErrorMessage';
  * HighRiskAlerts Component
  * Raus-inspired: warm urgency without harshness, editorial style
  */
-const HighRiskAlerts = ({ onPatientSelect }) => {
+const HighRiskAlerts = ({ onPatientSelect, patients: propsPatients }) => {
   const navigate = useNavigate();
   const [highRiskPatients, setHighRiskPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +20,12 @@ const HighRiskAlerts = ({ onPatientSelect }) => {
       setLoading(true);
       setError(null);
 
-      const patients = await getHighRiskPatients();
+      let patientsToFilter = propsPatients;
+      if (!patientsToFilter || !patientsToFilter.length) {
+        patientsToFilter = await getHighRiskPatients();
+      }
       
-      const sortedPatients = patients
+      const sortedPatients = patientsToFilter
         .filter(patient => (patient.complianceScore || 0) < 60)
         .sort((a, b) => (a.complianceScore || 0) - (b.complianceScore || 0));
       
@@ -39,7 +42,7 @@ const HighRiskAlerts = ({ onPatientSelect }) => {
     fetchHighRiskPatients();
     const refreshInterval = setInterval(fetchHighRiskPatients, 5 * 60 * 1000);
     return () => clearInterval(refreshInterval);
-  }, []);
+  }, [propsPatients]);
 
   const handlePatientClick = (patient) => {
     const id = patient.id || patient._id;
@@ -54,12 +57,12 @@ const HighRiskAlerts = ({ onPatientSelect }) => {
     return (
       <div className="card-warm border-l-4 border-l-copper-500">
         <div className="flex items-center justify-between mb-6">
-          <div className="h-6 w-32 bg-cream-200 animate-pulse rounded-lg" />
-          <div className="h-6 w-16 bg-red-50 animate-pulse rounded-full" />
+          <div className="h-6 w-32 skeleton" />
+          <div className="h-6 w-16 skeleton rounded-full" />
         </div>
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-cream-100 animate-pulse rounded-2xl" />
+            <div key={i} className="h-20 skeleton rounded-2xl" />
           ))}
         </div>
       </div>
