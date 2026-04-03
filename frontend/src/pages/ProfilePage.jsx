@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import Navigation from '../components/Navigation';
 import ComingSoonModal from '../components/ComingSoonModal';
 
@@ -27,8 +29,19 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-cream-100">
       <Navigation />
-      
-      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-10 lg:py-16 animate-fade-in">
+
+      <main className="max-w-3xl mx-auto px-5 sm:px-8 pt-32 pb-16 lg:pt-40 animate-fade-in">
+        <header className="mb-12">
+           <div className="inline-flex items-center gap-3 px-3 py-1 bg-forest-50 rounded-lg mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-forest-400" />
+              <span className="text-[10px] font-black text-forest-500 uppercase tracking-[0.2em]">Personal Identity</span>
+           </div>
+           <h1 className="font-serif text-5xl text-forest-500 tracking-tight leading-[0.9]">
+             Your <br />
+             <span className="text-forest-300">Profile</span>
+           </h1>
+        </header>
+
         <div className="card-warm overflow-hidden">
           {/* Header */}
           <div className="bg-forest-500 px-8 py-12 -mx-8 -mt-8 mb-8 rounded-t-[2rem]">
@@ -127,20 +140,20 @@ const ProfilePage = () => {
                 <p className="font-medium text-forest-500">Password</p>
                 <p className="text-sm text-forest-500/40 mt-0.5">Change your account password regularly</p>
               </div>
-              <button 
+              <button
                 onClick={() => { setActiveFeature('Password Management'); setIsComingSoonOpen(true); }}
                 className="btn-pill-ghost text-forest-400 hover:text-forest-500"
               >
                 Change
               </button>
             </div>
-            
+
             <div className="flex items-center justify-between py-5">
               <div>
                 <p className="font-medium text-forest-500">Two-Factor Authentication</p>
                 <p className="text-sm text-status-pending mt-0.5">Currently Disabled</p>
               </div>
-              <button 
+              <button
                 onClick={() => { setActiveFeature('Multi-Factor Authentication'); setIsComingSoonOpen(true); }}
                 className="btn-pill-ghost text-forest-400 hover:text-forest-500"
               >
@@ -149,9 +162,9 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      <ComingSoonModal 
+      <ComingSoonModal
         isOpen={isComingSoonOpen}
         onClose={() => setIsComingSoonOpen(false)}
         featureName={activeFeature}

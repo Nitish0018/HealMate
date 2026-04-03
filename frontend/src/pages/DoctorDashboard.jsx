@@ -28,12 +28,12 @@ const DoctorDashboard = () => {
       setLoading(true);
       setError(null);
       const data = await getPatientsList();
-      
+
       const patientsWithData = data.map(p => ({
         ...p,
         complianceScore: p.complianceScore || Math.floor(Math.random() * 41) + 55,
       }));
-      
+
       setPatients(patientsWithData);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -49,7 +49,7 @@ const DoctorDashboard = () => {
 
   const stats = useMemo(() => {
     if (!patients.length) return { total: 0, high: 0, medium: 0, low: 0 };
-    
+
     return {
       total: patients.length,
       high: patients.filter(p => p.complianceScore >= 80).length,
@@ -98,39 +98,57 @@ const DoctorDashboard = () => {
   return (
     <div className="min-h-screen bg-cream-100">
       <Navigation />
-      
-      <main className="max-w-7xl mx-auto px-5 sm:px-8 py-8 lg:py-12">
+
+      <main className="max-w-7xl mx-auto px-5 sm:px-8 pt-32 pb-12 lg:pt-40">
         {/* Header — Raus editorial */}
-        <header className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6 animate-fade-in">
-          <div>
-            <h1 className="font-serif text-4xl sm:text-5xl text-forest-500 leading-tight">
-              Clinical Overview
-            </h1>
-            <p className="mt-3 text-forest-500/40 text-lg font-light">
-              Welcome back, <span className="text-forest-400 font-medium">Dr. {user?.displayName || user?.email?.split('@')[0]}</span>
-            </p>
+        <header className="mb-14 flex flex-col md:flex-row md:items-start md:justify-between gap-8 animate-fade-in">
+          <div className="space-y-4">
+             <div className="inline-flex items-center gap-3 px-3 py-1 bg-forest-50 rounded-lg">
+                <span className="w-1.5 h-1.5 rounded-full bg-forest-400 animate-pulse" />
+                <span className="text-[10px] font-black text-forest-500 uppercase tracking-[0.2em]">Clinical Portal</span>
+             </div>
+             <h1 className="font-serif text-5xl sm:text-7xl text-forest-500 tracking-tight leading-[0.9]">
+               Clinical <br />
+               <span className="text-forest-300">Overview</span>
+             </h1>
+             <div className="pt-4 space-y-2">
+                <p className="text-forest-500/40 text-xs font-black uppercase tracking-[0.3em]">
+                  {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                </p>
+                <p className="text-forest-500/30 text-sm max-w-[320px] leading-relaxed font-light">
+                  Providing professional oversight for {patients.length} patients. Your expertise scales the quality of care.
+                </p>
+             </div>
           </div>
-          <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-full shadow-warm border border-cream-200/60">
-            <div className="flex -space-x-2">
-              {patients.length > 0 ? (
-                patients.slice(0, 3).map((p, i) => (
-                  <div 
-                    key={i} 
-                    className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-forest-500 shadow-sm"
-                    style={{ backgroundColor: ['#E6F0EA', '#FAF3E0', '#FDEAEA'][i % 3] }}
-                  >
-                    {(p.name || p.email || 'P').charAt(0).toUpperCase()}
+          
+          <div className="flex flex-wrap items-center gap-6">
+            {/* Population Stat */}
+            <div className="flex items-center gap-4 group cursor-default">
+               <div className="text-right">
+                  <p className="text-[10px] font-black text-forest-300 uppercase tracking-widest leading-none mb-1">Active Patients</p>
+                  <p className="text-2xl font-serif text-forest-500">{stats.total}</p>
+               </div>
+               <div className="w-12 h-12 rounded-2xl bg-white shadow-soft border border-cream-100 flex items-center justify-center text-forest-400 overflow-hidden">
+                  <div className="flex -space-x-2">
+                    {patients.slice(0, 2).map((p, i) => (
+                      <div key={i} className="w-6 h-6 rounded-full border border-white bg-cream-100 flex items-center justify-center text-[8px] font-bold">
+                        {(p.name || 'P').charAt(0)}
+                      </div>
+                    ))}
                   </div>
-                ))
-              ) : (
-                [1, 2, 3].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-cream-200" />
-                ))
-              )}
+               </div>
             </div>
-            <span className="text-sm font-medium text-forest-500/60">
-              {stats.total} Active Patients
-            </span>
+
+            {/* Adherence Stat */}
+            <div className="flex items-center gap-4 group cursor-default pl-6 border-l border-cream-200">
+               <div className="text-right">
+                  <p className="text-[10px] font-black text-forest-300 uppercase tracking-widest leading-none mb-1">Global Adherence</p>
+                  <p className="text-2xl font-serif text-forest-500">{stats.total ? Math.round((stats.high / stats.total) * 100) : 0}%</p>
+               </div>
+               <div className="w-12 h-12 rounded-2xl bg-forest-500 flex items-center justify-center text-white shadow-warm">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+               </div>
+            </div>
           </div>
         </header>
 
@@ -163,7 +181,7 @@ const DoctorDashboard = () => {
                   <p className="text-sm text-forest-500/40 mt-1">Population health overview</p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center justify-center h-[320px] w-full">
                 {loading ? (
                   <div className="w-full flex flex-col md:flex-row items-center gap-8 px-4">
@@ -194,10 +212,10 @@ const DoctorDashboard = () => {
                               <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                             ))}
                           </Pie>
-                          <RechartsTooltip 
-                            contentStyle={{ 
-                              borderRadius: '1rem', 
-                              border: 'none', 
+                          <RechartsTooltip
+                            contentStyle={{
+                              borderRadius: '1rem',
+                              border: 'none',
                               boxShadow: '0 4px 24px -2px rgba(0,65,34,0.1)',
                               background: 'white',
                               fontFamily: 'Inter, sans-serif',
@@ -226,7 +244,7 @@ const DoctorDashboard = () => {
 
             {/* Patient List */}
             <section className="card-warm p-2">
-               <PatientList />
+              <PatientList />
             </section>
           </div>
 
@@ -234,7 +252,7 @@ const DoctorDashboard = () => {
           <aside className="lg:col-span-4 space-y-8">
             <section className="sticky top-24 space-y-8">
               <HighRiskAlerts patients={patients} />
-              
+
               {/* AI Insights Card */}
               <div className="bg-forest-500 rounded-[2rem] p-7 text-cream-50 shadow-warm-lg">
                 <div className="flex items-center gap-3 mb-5">
@@ -248,7 +266,7 @@ const DoctorDashboard = () => {
                 <p className="text-cream-100/60 text-sm leading-relaxed mb-6 font-light">
                   Based on recent patterns, 3 patients in your watchlist show early signs of fatigue and may miss upcoming doses.
                 </p>
-                <button 
+                <button
                   onClick={() => setIsAIInsightsOpen(true)}
                   className="w-full btn-pill bg-gold-300 text-forest-500 px-6 py-3.5 text-sm font-semibold shadow-gold hover:brightness-105"
                 >

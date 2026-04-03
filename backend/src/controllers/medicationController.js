@@ -23,15 +23,16 @@ const addMedication = async (req, res, next) => {
     // In our system, the "User" might be adding a personal med not in MIMIC
     // We could store these in a separate CustomMedication schema, but for Phase 2 
     // we'll mock the success response to let the UI proceed.
-    const { subject_id, drug, startdate, dose_val_rx, dose_unit_rx, route } = req.body;
+    const { subject_id, drug, startdate, dose_val_rx, dose_unit_rx, route, hadm_id } = req.body;
     
     const newMed = await Prescription.create({
       subject_id,
+      hadm_id: hadm_id || Math.floor(100000 + Math.random() * 900000), // Random dummy HADM_ID if manual
       drug,
-      startdate,
+      startdate: startdate || new Date(),
       dose_val_rx,
       dose_unit_rx,
-      route,
+      route: route || 'PO', // Default to 'PO' (By Mouth)
       drug_type: 'MAIN'
     });
 

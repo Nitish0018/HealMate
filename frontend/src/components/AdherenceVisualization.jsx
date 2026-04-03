@@ -10,7 +10,7 @@ import LoadingSpinner from './LoadingSpinner';
  * Premium clinical insights for patients. 
  * Replaces generic charts with high-fidelity progress rings and trend analysis.
  */
-const AdherenceVisualization = () => {
+const AdherenceVisualization = ({ refreshTrigger }) => {
   const { user } = useAuth();
   const [adherenceData, setAdherenceData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ const AdherenceVisualization = () => {
       }
     };
     fetchAdherenceData();
-  }, [user?.mimic_subject_id]);
+  }, [user?.mimic_subject_id, refreshTrigger]);
 
   const processAdherenceLogs = (logs) => {
     const now = new Date();

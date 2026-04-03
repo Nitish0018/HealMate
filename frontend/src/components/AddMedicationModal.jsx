@@ -5,7 +5,13 @@ import LoadingSpinner from './LoadingSpinner';
  * AddMedicationModal
  * Raus-inspired: warm, editorial modal with generous spacing
  */
-const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
+const COMMON_MEDICATIONS = [
+  'Atorvastatin', 'Lisinopril', 'Levothyroxine', 'Metformin', 'Amlodipine',
+  'Metoprolol', 'Albuterol', 'Omeprazole', 'Losartan', 'Gabapentin',
+  'Hydrochlorothiazide', 'Sertraline', 'Simvastatin', 'Montelukast', 'Acetaminophen'
+];
+
+const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId, subjectId }) => {
   const [formData, setFormData] = useState({
     name: '',
     dosage: '',
@@ -30,7 +36,7 @@ const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
       
       const medicationData = {
         ...formData,
-        patientId,
+        subject_id: subjectId,
         drug: formData.name,
         dose_val_rx: formData.dosage,
         frequency: formData.frequency,
@@ -85,11 +91,15 @@ const AddMedicationModal = ({ isOpen, onClose, onAdd, patientId }) => {
               <input
                 type="text"
                 required
+                list="medication-suggestions"
                 className="input-warm"
                 placeholder="e.g. Metformin"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
+              <datalist id="medication-suggestions">
+                {COMMON_MEDICATIONS.map(med => <option key={med} value={med} />)}
+              </datalist>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

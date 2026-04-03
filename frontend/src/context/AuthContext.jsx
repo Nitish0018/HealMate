@@ -45,7 +45,8 @@ export const AuthProvider = ({ children }) => {
           const profile = await getUserProfile();
           
           const userData = {
-            uid: firebaseUser.uid,
+            uid: profile._id, // Use MongoDB _id for database operations
+            fbUid: firebaseUser.uid, // Keep Firebase UID if needed
             email: firebaseUser.email,
             displayName: profile.name || firebaseUser.displayName,
             role: profile.role,
@@ -66,9 +67,23 @@ export const AuthProvider = ({ children }) => {
           setError(null);
         } catch (err) {
           console.error('Error fetching user profile:', err);
-          setError('Unable to retrieve account information');
-          // If profile fetch fails, log out the user
-          handleLogout();
+          
+          // Check if it's a 404 (Profile missing in MongoDB but exists in Firebase)
+          if (err.response?.status === 404) {
+            console.warn('Profile missing in MongoDB. Keeping Firebase session active.');
+            // We'll set a basic user object so the app doesn't crash, 
+            // but the role will be null, which can trigger a 'Finish Profile' flow.
+            setUser({
+              uid: null,
+              fbUid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              role: null
+            });
+          } else {
+            setError('Unable to retrieve account information');
+            handleLogout();
+          }
         }
       } else {
         // User is signed out

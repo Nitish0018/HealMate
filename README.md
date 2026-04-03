@@ -9,6 +9,9 @@ HealMate is a smart health-tech solution designed to tackle medication non-adher
 - **Adherence Tracking**: Log and monitor medication adherence.
 - **AI-Powered Predictions**: Predicts medication non-adherence using machine learning.
 - **Real-time Alerts**: Notifies users, caregivers, and doctors about potential non-adherence.
+- **Caregiver Portal**: A dedicated dashboard for caregivers to monitor dependents.
+- **Patient Invitation**: Caregivers can invite patients to be managed under their care.
+- **Informational Pages**: Includes pages for Contact, Documentation, Privacy Policy, and Terms of Service.
 
 ## Tech Stack
 

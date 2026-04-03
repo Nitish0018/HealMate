@@ -6,13 +6,13 @@ const User = require('../models/User');
 // Log when a medication is taken manually by a patient
 const logIntake = async (req, res, next) => {
   try {
-    const { user_id, mimic_prescription_row_id, mimic_subject_id, status } = req.body;
+    const { user_id, mimic_prescription_row_id, mimic_subject_id, status, scheduled_time } = req.body;
     
     const log = await AdherenceLog.create({
       user_id,
       mimic_prescription_row_id,
       mimic_subject_id,
-      scheduled_time: new Date(), 
+      scheduled_time: scheduled_time || new Date(), 
       status: status || 'TAKEN', 
       taken_time: status === 'TAKEN' ? new Date() : null,
       is_simulated: false

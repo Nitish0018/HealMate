@@ -5,6 +5,7 @@ import { register as firebaseRegister } from '../services/authService';
 import { registerUser } from '../services/userService';
 import { ROUTES } from '../constants/routes';
 import LoadingSpinner from '../components/LoadingSpinner';
+import LandingPage from '../components/LandingPage';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,8 @@ const RegisterPage = () => {
         navigate(ROUTES.PATIENT_DASHBOARD);
       } else if (role === 'DOCTOR') {
         navigate(ROUTES.DOCTOR_DASHBOARD);
+      } else if (role === 'CAREGIVER') {
+        navigate(ROUTES.CAREGIVER_DASHBOARD);
       }
     }
   }, [isAuthenticated, role, authLoading, navigate]);
@@ -94,6 +97,8 @@ const RegisterPage = () => {
         navigate(ROUTES.PATIENT_DASHBOARD);
       } else if (formData.role === 'DOCTOR') {
         navigate(ROUTES.DOCTOR_DASHBOARD);
+      } else if (formData.role === 'CAREGIVER') {
+        navigate(ROUTES.CAREGIVER_DASHBOARD);
       }
     } catch (err) {
       console.error('Registration failed:', err);
@@ -121,168 +126,174 @@ const RegisterPage = () => {
   const roles = [
     { value: 'PATIENT', label: 'Patient', desc: 'Track your medications & health' },
     { value: 'DOCTOR', label: 'Doctor', desc: 'Monitor patients & insights' },
+    { value: 'CAREGIVER', label: 'Caregiver', desc: 'Support your loved ones' },
   ];
 
   return (
-    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-5">
-      {/* Decorative background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-forest-50/40 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full bg-gold-50/60 blur-3xl" />
+    <div className="relative min-h-screen">
+      {/* Background Landing Page */}
+      <div className="fixed inset-0 z-0 h-screen w-screen overflow-hidden opacity-30 pointer-events-none">
+        <LandingPage />
       </div>
 
-      <div className="relative z-10 w-full max-w-md animate-fade-in">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-3 group" id="register-logo">
-            <div className="w-12 h-12 bg-forest-500 rounded-full flex items-center justify-center text-cream-50 shadow-warm group-hover:scale-105 transition-transform">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <span className="font-serif text-3xl text-forest-500">HealMate</span>
-          </Link>
-          <p className="mt-4 text-forest-500/50 text-base font-medium">
-            Begin your path to better health.
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="card-warm">
-          {/* Error Message */}
-          {formError && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl" id="register-error">
-              <p className="text-red-600 text-sm font-medium">{formError}</p>
-            </div>
-          )}
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="label-warm">Full Name</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                className="input-warm"
-                placeholder="Your full name"
-                disabled={isSubmitting}
-                autoComplete="name"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="label-warm">Email Address</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input-warm"
-                placeholder="you@example.com"
-                disabled={isSubmitting}
-                autoComplete="email"
-              />
-            </div>
-
-            {/* Role Selection — Card-style toggle */}
-            <div>
-              <label className="label-warm">I am a</label>
-              <div className="grid grid-cols-2 gap-3">
-                {roles.map((r) => (
-                  <button
-                    key={r.value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, role: r.value })}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all duration-300 ${
-                      formData.role === r.value
-                        ? 'border-forest-500 bg-forest-50'
-                        : 'border-cream-200 bg-cream-50 hover:border-cream-300'
-                    }`}
-                    disabled={isSubmitting}
-                  >
-                    <span className={`text-sm font-semibold block ${
-                      formData.role === r.value ? 'text-forest-500' : 'text-forest-500/50'
-                    }`}>{r.label}</span>
-                    <span className="text-[11px] text-forest-500/30 mt-0.5 block">{r.desc}</span>
-                  </button>
-                ))}
+      {/* Glassmorphic Overlay Container */}
+      <div className="fixed inset-0 z-10 flex flex-col items-center p-4 bg-white/40 backdrop-blur-md overflow-y-auto pt-16 pb-20">
+        <div className="relative w-full max-w-md animate-fade-in my-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center gap-3 group" id="register-logo">
+              <div className="w-12 h-12 bg-forest-500 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
               </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="label-warm">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="input-warm"
-                placeholder="At least 6 characters"
-                disabled={isSubmitting}
-                autoComplete="new-password"
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="label-warm">Confirm Password</label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="input-warm"
-                placeholder="Re-enter your password"
-                disabled={isSubmitting}
-                autoComplete="new-password"
-              />
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              id="register-submit"
-              className="w-full btn-pill-primary py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" color="border-forest-500" />
-                  Creating account...
-                </span>
-              ) : (
-                <>
-                  Create Account
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Login Link */}
-          <div className="mt-8 text-center">
-            <p className="text-forest-500/40 text-sm">
-              Already have an account?{' '}
-              <button
-                onClick={() => navigate(ROUTES.LOGIN)}
-                className="text-forest-500 font-semibold hover:text-forest-300 transition-colors"
-                disabled={isSubmitting}
-                id="register-login-link"
-              >
-                Sign in →
-              </button>
+              <span className="font-bold text-3xl text-gray-900 tracking-tight">HealMate</span>
+            </Link>
+            <p className="mt-4 text-gray-600 text-base">
+              Begin your path to better health.
             </p>
+          </div>
+
+          {/* Glassmorphic Card */}
+          <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-2xl p-8 shadow-xl relative overflow-hidden">
+            {/* Soft inner glow */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-forest-400 to-forest-600"></div>
+
+            {/* Error Message */}
+            {formError && (
+              <div className="mb-6 p-4 bg-red-50/90 border border-red-100 rounded-xl backdrop-blur-sm" id="register-error">
+                <p className="text-red-600 text-sm font-medium">{formError}</p>
+              </div>
+            )}
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+              {/* Name */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/60 border border-gray-200/60 rounded-xl focus:ring-2 focus:ring-forest-500/50 focus:border-forest-500 outline-none transition-all placeholder-gray-400 backdrop-blur-sm shadow-inner"
+                  placeholder="Your full name"
+                  disabled={isSubmitting}
+                  autoComplete="name"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/60 border border-gray-200/60 rounded-xl focus:ring-2 focus:ring-forest-500/50 focus:border-forest-500 outline-none transition-all placeholder-gray-400 backdrop-blur-sm shadow-inner"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  autoComplete="email"
+                />
+              </div>
+
+              {/* Role Selection — Card-style toggle */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">I am a</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {roles.map((r) => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, role: r.value })}
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-300 ${
+                        formData.role === r.value
+                          ? 'border-forest-500 bg-forest-50/80 shadow-md transform scale-[1.02]'
+                          : 'border-gray-200/60 bg-white/40 hover:border-forest-300 backdrop-blur-sm shadow-inner'
+                      }`}
+                      disabled={isSubmitting}
+                    >
+                      <span className={`text-sm font-bold block ${
+                        formData.role === r.value ? 'text-forest-600' : 'text-gray-600'
+                      }`}>{r.label}</span>
+                      <span className={`text-[11px] mt-0.5 block ${formData.role === r.value ? 'text-forest-500/80' : 'text-gray-400'}`}>{r.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/60 border border-gray-200/60 rounded-xl focus:ring-2 focus:ring-forest-500/50 focus:border-forest-500 outline-none transition-all placeholder-gray-400 backdrop-blur-sm shadow-inner"
+                  placeholder="At least 6 characters"
+                  disabled={isSubmitting}
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-1.5">Confirm Password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/60 border border-gray-200/60 rounded-xl focus:ring-2 focus:ring-forest-500/50 focus:border-forest-500 outline-none transition-all placeholder-gray-400 backdrop-blur-sm shadow-inner"
+                  placeholder="Re-enter your password"
+                  disabled={isSubmitting}
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                id="register-submit"
+                className="w-full bg-forest-500 hover:bg-forest-600 text-white font-medium py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex justify-center items-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoadingSpinner size="sm" color="border-white" />
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    Create Account
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Login Link */}
+            <div className="mt-8 text-center border-t border-gray-100/50 pt-6">
+              <p className="text-gray-600 text-sm">
+                Already have an account?{' '}
+                <button
+                  onClick={() => navigate(ROUTES.LOGIN)}
+                  className="text-forest-600 font-semibold hover:text-forest-700 transition-colors"
+                  disabled={isSubmitting}
+                  id="register-login-link"
+                >
+                  Sign in →
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>

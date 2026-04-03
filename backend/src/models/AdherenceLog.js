@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const adherenceLogSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  mimic_prescription_row_id: { type: Number, required: true }, // Links to the exact MIMIC-III prescription
+  mimic_prescription_row_id: { type: String, required: true }, // Links to the exact MIMIC-III prescription
   mimic_subject_id: { type: Number }, // To easily query logs by MIMIC patient
   
   scheduled_time: { type: Date, required: true },

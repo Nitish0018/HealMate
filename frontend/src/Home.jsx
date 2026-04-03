@@ -1,10 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { ROUTES } from './constants/routes';
+import LandingPage from './components/LandingPage';
 
 /**
  * Home Component
- * Root route handler — redirects based on auth state
+ * Root route handler — shows landing page for unauthenticated users,
+ * redirects authenticated users based on their role
  */
 const Home = () => {
   const { isAuthenticated, role, loading } = useAuth();
@@ -25,12 +27,13 @@ const Home = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={ROUTES.LOGIN} replace />;
+    return <LandingPage />;
   }
 
   if (role === 'PATIENT') {
     return <Navigate to={ROUTES.PATIENT_DASHBOARD} replace />;
   }
+
   
   if (role === 'DOCTOR') {
     return <Navigate to={ROUTES.DOCTOR_DASHBOARD} replace />;

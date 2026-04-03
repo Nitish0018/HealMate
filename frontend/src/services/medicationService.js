@@ -33,6 +33,10 @@ export const getPatientMedications = async (subjectId) => {
 export const addMedication = async (medicationData) => {
   try {
     const response = await apiClient.post('/medications', medicationData);
+    
+    // Invalidate cache so the new medication shows up immediately
+    invalidateCache();
+    
     return response.data.data || response.data;
   } catch (error) {
     console.error('Error adding medication:', error);

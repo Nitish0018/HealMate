@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '../constants/routes';
 import LoadingSpinner from '../components/LoadingSpinner';
+import LandingPage from '../components/LandingPage';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -20,6 +21,8 @@ const LoginPage = () => {
         navigate(ROUTES.PATIENT_DASHBOARD);
       } else if (role === 'DOCTOR') {
         navigate(ROUTES.DOCTOR_DASHBOARD);
+      } else if (role === 'CAREGIVER') {
+        navigate(ROUTES.CAREGIVER_DASHBOARD);
       }
     }
   }, [isAuthenticated, role, authLoading, navigate]);
@@ -62,110 +65,115 @@ const LoginPage = () => {
   const displayError = formError || authError;
 
   return (
-    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-5">
-      {/* Decorative background shapes */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-forest-50/40 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-gold-50/60 blur-3xl" />
+    <div className="relative min-h-screen">
+      {/* Background Landing Page */}
+      <div className="fixed inset-0 z-0 h-screen w-screen overflow-hidden opacity-30 pointer-events-none">
+        <LandingPage />
       </div>
 
-      <div className="relative z-10 w-full max-w-md animate-fade-in">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-3 group" id="login-logo">
-            <div className="w-12 h-12 bg-forest-500 rounded-full flex items-center justify-center text-cream-50 shadow-warm group-hover:scale-105 transition-transform">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <span className="font-serif text-3xl text-forest-500">HealMate</span>
-          </Link>
-          <p className="mt-4 text-forest-500/50 text-base font-medium">
-            Welcome back. Sign in to continue your journey.
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="card-warm">
-          {/* Error Message */}
-          {displayError && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl" id="login-error">
-              <p className="text-red-600 text-sm font-medium">{displayError}</p>
-            </div>
-          )}
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="label-warm">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-warm"
-                placeholder="you@example.com"
-                disabled={isSubmitting}
-                autoComplete="email"
-              />
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="label-warm">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-warm"
-                placeholder="Enter your password"
-                disabled={isSubmitting}
-                autoComplete="current-password"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              id="login-submit"
-              className="w-full btn-pill-primary py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" color="border-forest-500" />
-                  Signing in...
-                </span>
-              ) : (
-                <>
-                  Sign In
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Register Link */}
-          <div className="mt-8 text-center">
-            <p className="text-forest-500/40 text-sm">
-              Don't have an account?{' '}
-              <button
-                onClick={() => navigate(ROUTES.REGISTER)}
-                className="text-forest-500 font-semibold hover:text-forest-300 transition-colors"
-                disabled={isSubmitting}
-                id="login-register-link"
-              >
-                Create one →
-              </button>
+      {/* Glassmorphic Overlay Container */}
+      <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-4 bg-white/40 backdrop-blur-md overflow-hidden">
+        <div className="relative w-full max-w-md animate-fade-in">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center gap-3 group" id="login-logo">
+              <div className="w-12 h-12 bg-forest-500 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <span className="font-bold text-3xl text-gray-900 tracking-tight">HealMate</span>
+            </Link>
+            <p className="mt-4 text-gray-600 text-base">
+              Welcome back. Sign in to continue your journey.
             </p>
+          </div>
+
+          {/* Glassmorphic Card */}
+          <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-2xl p-8 shadow-xl relative overflow-hidden">
+            {/* Soft inner glow */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-forest-400 to-forest-600"></div>
+
+            {/* Error Message */}
+            {displayError && (
+              <div className="mb-6 p-4 bg-red-50/90 border border-red-100 rounded-xl backdrop-blur-sm" id="login-error">
+                <p className="text-red-600 text-sm font-medium">{displayError}</p>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/60 border border-gray-200/60 rounded-xl focus:ring-2 focus:ring-forest-500/50 focus:border-forest-500 outline-none transition-all placeholder-gray-400 backdrop-blur-sm shadow-inner"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  autoComplete="email"
+                />
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/60 border border-gray-200/60 rounded-xl focus:ring-2 focus:ring-forest-500/50 focus:border-forest-500 outline-none transition-all placeholder-gray-400 backdrop-blur-sm shadow-inner"
+                  placeholder="Enter your password"
+                  disabled={isSubmitting}
+                  autoComplete="current-password"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                id="login-submit"
+                className="w-full bg-forest-500 hover:bg-forest-600 text-white font-medium py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex justify-center items-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoadingSpinner size="sm" color="border-white" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Register Link */}
+            <div className="mt-8 text-center border-t border-gray-100/50 pt-6">
+              <p className="text-gray-600 text-sm">
+                Don't have an account?{' '}
+                <button
+                  onClick={() => navigate(ROUTES.REGISTER)}
+                  className="text-forest-600 font-semibold hover:text-forest-700 transition-colors"
+                  disabled={isSubmitting}
+                  id="login-register-link"
+                >
+                  Create one →
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>

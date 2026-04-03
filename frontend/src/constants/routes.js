@@ -5,7 +5,13 @@ export const ROUTES = {
   REGISTER: '/register',
   UNAUTHORIZED: '/unauthorized',
   PROFILE: '/profile',
-  
+  CONTACT: '/contact',
+  HELP_CENTER: '/help',
+  DOCUMENTATION: '/docs',
+  PRIVACY_POLICY: '/privacy-policy',
+  TERMS_OF_SERVICE: '/terms-of-service',
+  HIPAA_COMPLIANCE: '/hipaa-compliance',
+
   // Patient routes
   PATIENT_DASHBOARD: '/patient/dashboard',
   

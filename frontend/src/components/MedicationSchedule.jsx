@@ -9,7 +9,7 @@ import ErrorMessage from './ErrorMessage';
  * MedicationSchedule Component
  * Premium clinical UI for daily medication tracking
  */
-const MedicationSchedule = ({ date, onLogIntake }) => {
+const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
   const { user } = useAuth();
   const [medications, setMedications] = useState([]);
   const [adherenceLogs, setAdherenceLogs] = useState([]);
@@ -46,7 +46,7 @@ const MedicationSchedule = ({ date, onLogIntake }) => {
       }
     };
     fetchData();
-  }, [user?.mimic_subject_id, selectedDateStr]);
+  }, [user?.mimic_subject_id, selectedDateStr, refreshTrigger]);
 
   const dailySchedule = useMemo(() => {
     if (!medications.length) return [];
@@ -67,8 +67,11 @@ const MedicationSchedule = ({ date, onLogIntake }) => {
 
       const todayLog = adherenceLogs.find(log => {
         const d = new Date(log.scheduled_time || log.createdAt);
+        const logId = String(log.mimic_prescription_row_id);
+        const medId = String(med.row_id || med._id);
         return d.toDateString() === date.toDateString() && 
-               (log.status === 'TAKEN' || log.status === 'DELAYED');
+               (log.status === 'TAKEN' || log.status === 'DELAYED') &&
+               logId === medId;
       });
 
       let status = 'pending';
@@ -79,7 +82,7 @@ const MedicationSchedule = ({ date, onLogIntake }) => {
       }
 
       return {
-        id: med._id || `med-${index}`,
+        id: med.row_id || med._id || `med-${index}`,
         name: med.drug || med.drug_name_poe || 'Prescription Med',
         dosage: `${med.dose_val_rx || ''} ${med.dose_unit_rx || ''}`.trim() || 'Standard Dose',
         slot: timeSlotLabels[scheduledTime],

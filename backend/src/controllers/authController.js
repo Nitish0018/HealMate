@@ -27,10 +27,17 @@ const register = async (req, res, next) => {
 const getProfile = async (req, res, next) => {
   try {
     // req.user comes from the firebase auth middleware
-    const user = await User.findOne({ email: req.user.email });
+    let user = await User.findOne({ email: req.user.email });
     
     if (!user) {
-      return res.status(404).json({ success: false, message: 'Profile not found' });
+      console.warn(`Auto-syncing Firebase user to MongoDB: ${req.user.email}`);
+      // Auto-create profile if missing but Firebase auth succeeded
+      user = await User.create({
+        email: req.user.email,
+        name: req.user.name || req.user.email.split('@')[0],
+        role: 'PATIENT', // Default role for auto-migrated users
+        passwordHash: 'firebase-managed'
+      });
     }
     
     res.status(200).json({ success: true, data: user });

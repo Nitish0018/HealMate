@@ -18,7 +18,7 @@ import ContactPatientModal from '../components/ContactPatientModal';
 const PatientDetailView = () => {
   const { patientId } = useParams();
   const navigate = useNavigate();
-  
+
   const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,7 +41,7 @@ const PatientDetailView = () => {
 
         const response = await getPatientDetail(patientId);
         const data = response.data || response;
-        
+
         // Ensure consistent data structure mapping from backend to frontend expectations
         const mappedPatientData = {
           patient: {
@@ -97,7 +97,7 @@ const PatientDetailView = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navigation />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation & Header Section */}
         <div className="mb-8">
@@ -113,7 +113,7 @@ const PatientDetailView = () => {
 
           <header className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-gray-100 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-[200px] -mr-20 -mt-20 opacity-40 z-0 transition-transform group-hover:scale-110 duration-700" />
-            
+
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
               <div className="flex items-center gap-6">
                 <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-200 ring-4 ring-white">
@@ -135,18 +135,18 @@ const PatientDetailView = () => {
                   <span className="text-4xl font-black">{patient.complianceScore}%</span>
                 </div>
                 <div className="hidden lg:flex flex-col gap-2">
-                   <button 
+                  <button
                     onClick={() => { setActiveFeature('Priority Actions'); setIsComingSoonOpen(true); }}
                     className="px-6 py-2 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all shadow-md"
-                   >
+                  >
                     Action Required
-                   </button>
-                   <button 
+                  </button>
+                  <button
                     onClick={() => { setActiveFeature('Clinical Data Export'); setIsComingSoonOpen(true); }}
                     className="px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-50 transition-all"
-                   >
+                  >
                     Export Data
-                   </button>
+                  </button>
                 </div>
               </div>
             </div>
@@ -161,19 +161,19 @@ const PatientDetailView = () => {
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-bold text-gray-900">Compliance Analytics</h3>
                 <div className="flex gap-2">
-                   <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z" />
-                     </svg>
-                   </span>
+                  <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z" />
+                    </svg>
+                  </span>
                 </div>
               </div>
               <ComplianceVisualization patientId={patientId} />
             </section>
-            
+
             <section className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-gray-100">
-               <h3 className="text-xl font-bold text-gray-900 mb-8">Dose Event History</h3>
-               <MissedDoseTimeline patientId={patientId} />
+              <h3 className="text-xl font-bold text-gray-900 mb-8">Dose Event History</h3>
+              <MissedDoseTimeline patientId={patientId} />
             </section>
           </div>
 
@@ -184,34 +184,34 @@ const PatientDetailView = () => {
                 <h3 className="text-xl font-bold text-gray-900">Regimen</h3>
                 <span className="px-2 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase rounded-lg">Active</span>
               </div>
-              
+
               <div className="space-y-4">
                 {medications.map((med) => (
                   <div key={med.id} className="p-4 rounded-2xl bg-gray-50 border border-transparent hover:border-blue-200 transition-all group">
                     <div className="flex items-center justify-between mb-2">
-                       <h4 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors uppercase text-sm">{med.name}</h4>
-                       <span className="text-[10px] font-black text-gray-400">{med.dosage}</span>
+                      <h4 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors uppercase text-sm">{med.name}</h4>
+                      <span className="text-[10px] font-black text-gray-400">{med.dosage}</span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
-                       <span className="flex items-center">
-                         <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                         {med.frequency}
-                       </span>
-                       <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                       <span>{med.time}</span>
+                      <span className="flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {med.frequency}
+                      </span>
+                      <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                      <span>{med.time}</span>
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="mt-8 space-y-3">
-                <button 
+                <button
                   className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all"
                   onClick={() => setIsContactModalOpen(true)}
                 >
                   Contact Patient
                 </button>
-                <button 
+                <button
                   className="w-full py-4 bg-white border border-gray-200 text-gray-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-all"
                   onClick={() => { setActiveFeature('Prescription Management'); setIsComingSoonOpen(true); }}
                 >
@@ -223,7 +223,7 @@ const PatientDetailView = () => {
         </div>
       </main>
 
-      <ComingSoonModal 
+      <ComingSoonModal
         isOpen={isComingSoonOpen}
         onClose={() => setIsComingSoonOpen(false)}
         featureName={activeFeature}
