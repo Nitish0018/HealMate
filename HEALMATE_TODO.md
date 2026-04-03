@@ -3,7 +3,7 @@
 Based on the Product Requirements Document (PRD) and Tech Stack, here is a structured development roadmap to build the AI-Based Medication Non-Adherence System.
 
 ## Phase 1: Project Setup & Architecture
-- [ ] Initialize frontend repository (React.js + Tailwind CSS)
+- [x] Initialize frontend repository (React.js + Tailwind CSS)
 - [x] Initialize backend repository (Node.js + Express.js)
 - [x] Set up database cluster (MongoDB Atlas) and basic connection
 - [x] Set up Firebase project for Authentication and Cloud Messaging (FCM)
