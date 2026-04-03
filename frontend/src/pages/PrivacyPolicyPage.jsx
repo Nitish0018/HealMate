@@ -167,7 +167,14 @@ const PrivacyPolicyPage = () => {
               </p>
               <div className="bg-forest-50 p-6 rounded-xl mt-4 inline-block">
                 <p className="font-semibold text-gray-900">HealMate Privacy Officer</p>
-                <p className="text-forest-600 mt-1">support@healmate.com</p>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=support@healmate.com&su=Privacy%20Policy%20Inquiry"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-forest-600 mt-1 hover:text-blue-600 transition-colors"
+                >
+                  support@healmate.com
+                </a>
               </div>
             </section>
 

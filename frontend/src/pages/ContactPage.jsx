@@ -103,8 +103,10 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h4 className="font-bold mb-1">Email Us</h4>
-                    <a 
-                      href="mailto:support@healmate.com?subject=Inquiry%20from%20HealMate%20Website&body=Hi%20HealMate%20Team,%0A%0A" 
+                    <a
+                      href="https://mail.google.com/mail/?view=cm&fs=1&to=support@healmate.com&su=Inquiry%20from%20HealMate%20Website&body=Hi%20HealMate%20Team,%0A%0A"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-forest-100 hover:text-white transition-colors"
                     >
                       support@healmate.com

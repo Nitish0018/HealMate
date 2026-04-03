@@ -163,7 +163,14 @@ const TermsOfServicePage = () => {
               </p>
               <div className="bg-forest-50 p-6 rounded-xl mt-4 inline-block">
                 <p className="font-semibold text-gray-900">HealMate Legal Department</p>
-                <p className="text-forest-600 mt-1">legal@healmate.com</p>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=legal@healmate.com&su=Terms%20of%20Service%20Inquiry"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-forest-600 mt-1 hover:text-blue-600 transition-colors"
+                >
+                  legal@healmate.com
+                </a>
               </div>
             </section>
 

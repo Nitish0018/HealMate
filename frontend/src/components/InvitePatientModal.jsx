@@ -1,35 +1,40 @@
 import { useState } from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import caregiverService from '../services/caregiverService';
 
 /**
  * InvitePatientModal Component
  * Premium modal for caregivers to invite new dependents
  */
-const InvitePatientModal = ({ isOpen, onClose, onInvite }) => {
+const InvitePatientModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [relation, setRelation] = useState('Parent');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    setSuccess(true);
-    
-    setTimeout(() => {
-      setSuccess(false);
-      onClose();
-      setEmail('');
-      setName('');
-    }, 2000);
+    setError('');
+
+    try {
+      await caregiverService.invitePatient(email);
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onClose();
+        setEmail('');
+        setName('');
+      }, 2500);
+    } catch (err) {
+      setError(err.message || 'Could not send invitation. Is the patient registered?');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,6 +54,11 @@ const InvitePatientModal = ({ isOpen, onClose, onInvite }) => {
                 </div>
                 <h2 className="font-serif text-3xl text-forest-500 tracking-tight mb-2">Invite to Circle</h2>
                 <p className="text-forest-500/40 text-sm font-medium italic">"Care is the thread that connects us all."</p>
+                {error && (
+                  <div className="mt-4 px-4 py-2 bg-rose-50 text-rose-500 text-[10px] font-bold uppercase rounded-lg border border-rose-100 animate-shake">
+                    {error}
+                  </div>
+                )}
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">

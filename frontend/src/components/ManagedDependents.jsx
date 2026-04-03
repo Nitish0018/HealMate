@@ -1,20 +1,23 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import ContactPatientModal from './ContactPatientModal';
+import caregiverService from '../services/caregiverService';
 
 /**
  * ManagedDependents Component
  * Displays a premium list of patients under the caregiver's supervision
- * Uses mock data for now as per instructions
+ * Uses real backend data with mock fallback as per instructions
  */
 const ManagedDependents = ({ onContact }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [patients, setPatients] = useState([]);
+  const [usingMock, setUsingMock] = useState(false);
 
-  // Premium Mock Data
-  const dependents = [
+  // Premium Mock Data (Fallback)
+  const mockDependents = [
     {
-      id: '1',
+      id: 'mock-1',
       name: 'John Doe',
       email: 'john.doe@example.com',
       age: 68,
@@ -24,12 +27,12 @@ const ManagedDependents = ({ onContact }) => {
       lastIntake: '8:30 AM (Metformin)',
       nextDose: '1:00 PM (Insulin)',
       riskLevel: 'low',
-      riskPrediction: 12, // 12% probability of missing next dose
+      riskPrediction: 12,
       streak: 14,
       avatar: 'J'
     },
     {
-      id: '2',
+      id: 'mock-2',
       name: 'Sarah Smith',
       email: 'sarah.smith@example.com',
       age: 72,
@@ -44,7 +47,7 @@ const ManagedDependents = ({ onContact }) => {
       avatar: 'S'
     },
     {
-      id: '3',
+      id: 'mock-3',
       name: 'Robert Wilson',
       email: 'robert.wilson@example.com',
       age: 65,
@@ -60,12 +63,54 @@ const ManagedDependents = ({ onContact }) => {
     }
   ];
 
-  const filteredDependents = useMemo(() => {
-    return dependents.filter(d => 
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const response = await caregiverService.getPatients();
+        
+        if (response.success && response.data.length > 0) {
+          // Map backend data to UI format
+          const mappedPatients = response.data.map(p => ({
+            id: p._id,
+            name: p.name,
+            email: p.email,
+            age: p.age || '—',
+            condition: p.total_prescriptions > 0 ? 'Chronic Care' : 'Preventive',
+            adherenceRate: p.healthScore || 0, // Simplified mapping
+            healthScore: p.healthScore || 0,
+            lastIntake: p.recentLogs?.[0] ? `${new Date(p.recentLogs[0].taken_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : 'No recent activity',
+            nextDose: 'Check Schedule',
+            riskLevel: p.healthScore < 60 ? 'high' : p.healthScore < 80 ? 'medium' : 'low',
+            riskPrediction: 100 - (p.healthScore || 0),
+            streak: p.currentStreak || 0,
+            avatar: p.name.charAt(0)
+          }));
+          setPatients(mappedPatients);
+          setUsingMock(false);
+        } else {
+          // Use mock if no real data found
+          setPatients(mockDependents);
+          setUsingMock(true);
+        }
+      } catch (error) {
+        console.error('Caregiver patients fetch failed:', error);
+        setPatients(mockDependents);
+        setUsingMock(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
+  const filteredPatients = useMemo(() => {
+    return patients.filter(d => 
       d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       d.condition.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, patients]);
 
   const getRiskColor = (level) => {
     switch(level) {
@@ -88,8 +133,13 @@ const ManagedDependents = ({ onContact }) => {
     <section className="space-y-10 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
-          <h2 className="font-serif text-3xl text-forest-500 tracking-tight">Your Circle</h2>
-          <p className="text-forest-500/40 text-sm font-medium mt-1">Found {filteredDependents.length} active monitoring connections</p>
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="font-serif text-3xl text-forest-500 tracking-tight">Your Circle</h2>
+            {usingMock && (
+              <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-[8px] font-black uppercase tracking-widest rounded-md border border-amber-200/50">Simulated</span>
+            )}
+          </div>
+          <p className="text-forest-500/40 text-sm font-medium">Found {filteredPatients.length} active monitoring connections</p>
         </div>
         
         <div className="relative group max-w-xs w-full">
@@ -107,12 +157,12 @@ const ManagedDependents = ({ onContact }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredDependents.length === 0 ? (
+        {filteredPatients.length === 0 ? (
           <div className="col-span-full py-16 text-center bg-white/40 border border-dashed border-cream-300 rounded-[2.5rem]">
              <p className="text-forest-300 font-medium italic">No dependents found matching your search.</p>
           </div>
         ) : (
-          filteredDependents.map((patient) => (
+          filteredPatients.map((patient) => (
             <div key={patient.id} className="group bg-white rounded-[2.5rem] p-8 border border-cream-200/60 shadow-warm hover:shadow-hover transition-all duration-500 relative overflow-hidden flex flex-col">
                {/* Streak Badge */}
                <div className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full border border-amber-100">

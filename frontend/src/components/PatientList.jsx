@@ -194,7 +194,15 @@ const PatientList = ({ onPatientSelect }) => {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-bold text-gray-900">{patient.name || 'Anonymous User'}</div>
-                          <div className="text-xs text-gray-500">{patient.email}</div>
+                          <a
+                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${patient.email}&su=Regarding%20Your%20HealMate%20Account`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-gray-500 hover:text-blue-600 transition-colors"
+                            onClick={(e) => e.stopPropagation()} // Prevent row click when clicking email
+                          >
+                            {patient.email}
+                          </a>
                         </div>
                       </div>
                     </td>
@@ -261,4 +269,4 @@ const PatientList = ({ onPatientSelect }) => {
   );
 };
 
-export default PatientList;
+export default PatientList;

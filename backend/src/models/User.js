@@ -34,7 +34,11 @@ const userSchema = new mongoose.Schema({
   badges: [{ 
     name: String, 
     dateEarned: { type: Date, default: Date.now } 
-  }]
+  }],
+
+  // Relationships (Phase 7+: Caregiver Collaboration)
+  caregiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {
   timestamps: true
 });

@@ -79,12 +79,14 @@ const ProfilePage = () => {
 
                 <div>
                   <label className="label-warm">Email Address</label>
-                  <input
-                    type="email"
-                    disabled={true}
-                    value={formData.email}
-                    className="input-warm opacity-60"
-                  />
+                  <a
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${formData.email}&su=Regarding%20Your%20HealMate%20Account`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="input-warm opacity-60 block w-full"
+                  >
+                    {formData.email}
+                  </a>
                 </div>
 
                 {role === 'PATIENT' && (

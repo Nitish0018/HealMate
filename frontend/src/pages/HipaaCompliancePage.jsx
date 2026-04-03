@@ -142,7 +142,14 @@ const HipaaCompliancePage = () => {
               </p>
               <div className="bg-forest-50 p-6 rounded-xl mt-4 inline-block">
                 <p className="font-semibold text-gray-900">Security & Compliance Officer</p>
-                <p className="text-forest-600 mt-1">security@healmate.com</p>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=security@healmate.com&su=Security%20Concern"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-forest-600 mt-1 hover:text-blue-600 transition-colors"
+                >
+                  security@healmate.com
+                </a>
               </div>
             </section>
 
