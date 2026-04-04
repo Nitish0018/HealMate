@@ -25,7 +25,7 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) {
+      if (!user || !user.mimic_subject_id) {
         setLoading(false);
         return;
       }
@@ -42,6 +42,8 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
         setMedications(medsResponse || []);
         setAdherenceLogs(logsResponse || []);
       } catch (err) {
+        // Ignore cancelled requests (e.g., no auth token available)
+        if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') return;
         console.error('Error fetching data:', err);
         setError('Clinical records synchronizing. Please hold...');
       } finally {

@@ -20,29 +20,19 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   // Initialize auth state on mount
+  // Note: We intentionally do NOT restore from localStorage here.
+  // The onAuthChange listener below is the single source of truth.
+  // This prevents stale tokens from triggering 401 API calls.
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        // Check localStorage for persisted auth state
-        const storedUser = localStorage.getItem('user');
-        const storedRole = localStorage.getItem('userRole');
-        
-        if (storedUser && storedRole) {
-          setUser(JSON.parse(storedUser));
-          setRole(storedRole);
-        }
-      } catch (err) {
-        console.error('Error initializing auth:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
+    // loading is already true by default, which prevents
+    // ProtectedRoute from rendering data-fetching children
+    // until Firebase confirms the session.
   }, []);
 
   // Listen to Firebase auth state changes
   useEffect(() => {
+    let isLogoutInProgress = false;
+
     const unsubscribe = onAuthChange(async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -71,13 +61,18 @@ export const AuthProvider = ({ children }) => {
           
           setError(null);
         } catch (err) {
+          // Ignore cancelled/aborted requests (from no-token guard)
+          if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') {
+            // Token wasn't ready yet — this is expected, not an error
+            setLoading(false);
+            return;
+          }
+
           console.error('Error fetching user profile:', err);
           
           // Check if it's a 404 (Profile missing in MongoDB but exists in Firebase)
           if (err.response?.status === 404) {
             console.warn('Profile missing in MongoDB. Keeping Firebase session active.');
-            // We'll set a basic user object so the app doesn't crash, 
-            // but the role will be null, which can trigger a 'Finish Profile' flow.
             setUser({
               uid: null,
               fbUid: firebaseUser.uid,
@@ -100,9 +95,13 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    // Listen for unauthorized events from API client
+    // Listen for unauthorized events from API client (debounced)
     const handleUnauthorized = () => {
-      handleLogout();
+      if (isLogoutInProgress) return;
+      isLogoutInProgress = true;
+      handleLogout().finally(() => {
+        isLogoutInProgress = false;
+      });
     };
     
     window.addEventListener('auth:unauthorized', handleUnauthorized);

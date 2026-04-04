@@ -11,12 +11,25 @@ const apiClient = axios.create({
   },
 });
 
+// Public endpoints that don't require authentication
+const PUBLIC_ENDPOINTS = ['/auth/register', '/auth/login', '/auth/google'];
+
 // Request interceptor to add authentication token
 apiClient.interceptors.request.use(
   async (config) => {
+    const isPublic = PUBLIC_ENDPOINTS.some(ep => config.url?.includes(ep));
     const token = await getCurrentUserToken();
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else if (!isPublic) {
+      // No token and not a public endpoint — abort the request silently
+      const controller = new AbortController();
+      controller.abort();
+      return {
+        ...config,
+        signal: controller.signal,
+      };
     }
     return config;
   },
@@ -29,19 +42,24 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Silently ignore aborted/cancelled requests (e.g., no-token guard)
+    if (axios.isCancel(error) || error.code === 'ERR_CANCELED' || error.name === 'CanceledError') {
+      return Promise.reject(error);
+    }
+
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
       
       switch (status) {
         case 401:
-          // Unauthorized - token expired or invalid
-          console.error('Authentication error:', data?.message || 'Unauthorized');
-          // Trigger logout or token refresh
-          window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+          // Only dispatch unauthorized event if not already on login flow
+          // This prevents cascading logout triggers
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+          }
           break;
         case 403:
-          // Forbidden - insufficient permissions
           console.error('Permission denied:', data?.message || 'Forbidden');
           break;
         case 404:

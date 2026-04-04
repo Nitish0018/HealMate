@@ -14,3 +14,6 @@ node_modules/
 # Ignore Twilio recovery codes
 twilio_2FA_recovery_code.txt
 
+# Ignore WhatsApp images
+WhatsApp*.jpeg
+

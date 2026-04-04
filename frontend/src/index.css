@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,12 +16,25 @@
     letter-spacing: -0.01em;
   }
 
+  h1, h2, h3, .font-serif {
+    font-family: 'DM Serif Display', serif;
+  }
+
   ::selection {
     @apply bg-forest-500 text-cream-50;
   }
 }
 
 @layer components {
+  /* Dashed Divider — Koox style */
+  .divider-dashed {
+    @apply w-full h-px bg-transparent border-t border-dashed border-forest-500/20 my-16;
+  }
+
+  .parallax-window {
+    @apply relative bg-fixed bg-center bg-cover overflow-hidden;
+    min-height: 50vh;
+  }
   /* Pill-shaped button — Raus style */
   .btn-pill {
     @apply inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 active:scale-[0.97] cursor-pointer whitespace-nowrap;

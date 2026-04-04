@@ -109,7 +109,7 @@ function App() {
             {/* Catch all - redirect to login */}
             <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
           </Routes>
-          
+
           {/* Footer displayed on all pages */}
           <Footer />
         </AuthProvider>

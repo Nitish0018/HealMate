@@ -28,6 +28,8 @@ const AdherenceVisualization = ({ refreshTrigger }) => {
         const logs = await getPatientAdherenceLogs(user.mimic_subject_id);
         setAdherenceData(processAdherenceLogs(logs));
       } catch (err) {
+        // Ignore cancelled requests (e.g., no auth token available)
+        if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') return;
         console.error('Error fetching adherence data:', err);
         setError('Clinical analytics currently synchronizing...');
       } finally {

@@ -7,6 +7,7 @@ import { logMedicationIntake } from '../services/adherenceService';
 import ErrorMessage from '../components/ErrorMessage';
 import AddMedicationModal from '../components/AddMedicationModal';
 import { addMedication } from '../services/medicationService';
+import Chatbot from '../components/Chatbot';
 
 /**
  * PatientDashboard Component
@@ -269,6 +270,9 @@ const PatientDashboard = () => {
         patientId={user?.uid}
         subjectId={user?.mimic_subject_id}
       />
+
+      {/* AI Health Assistant Chatbot */}
+      <Chatbot />
     </div>
   );
 };
