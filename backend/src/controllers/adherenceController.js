@@ -46,9 +46,14 @@ const logIntake = async (req, res, next) => {
 const getPatientAdherenceLogs = async (req, res, next) => {
   try {
     const { subjectId } = req.params;
+    const dbUserId = req.dbUser?._id;
     
-    const logs = await AdherenceLog.find({ mimic_subject_id: subjectId })
-      .sort({ scheduled_time: -1 });
+    const logs = await AdherenceLog.find({ 
+      $or: [
+        { mimic_subject_id: subjectId },
+        { user_id: dbUserId }
+      ]
+    }).sort({ scheduled_time: -1 });
 
     res.status(200).json({ success: true, count: logs.length, data: logs });
   } catch (error) {

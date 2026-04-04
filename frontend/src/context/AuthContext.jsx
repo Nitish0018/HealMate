@@ -1,7 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login as firebaseLogin, logout as firebaseLogout, onAuthChange } from '../services/authService';
+import { 
+  login as firebaseLogin, 
+  loginWithGoogle as firebaseLoginWithGoogle,
+  logout as firebaseLogout, 
+  onAuthChange 
+} from '../services/authService';
 import { getUserProfile } from '../services/userService';
 import { ROUTES } from '../constants/routes';
 
@@ -140,6 +145,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await firebaseLoginWithGoogle();
+      
+      // The onAuthChange listener handles state
+    } catch (err) {
+      console.error('Google login error:', err);
+      let errorMessage = 'Google Sign-In failed.';
+      
+      if (err.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in cancelled';
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = 'Network connection lost';
+      }
+      
+      setError(errorMessage);
+      setLoading(false);
+      throw new Error(errorMessage);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       setLoading(true);
@@ -170,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    loginWithGoogle,
     logout: handleLogout,
     isAuthenticated: !!user,
   };

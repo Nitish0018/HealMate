@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Navigation from '../components/Navigation';
-import LoadingSpinner from '../components/LoadingSpinner';
 import ManagedDependents from '../components/ManagedDependents';
 import CaregiverAlertsFeed from '../components/CaregiverAlertsFeed';
 import InvitePatientModal from '../components/InvitePatientModal';

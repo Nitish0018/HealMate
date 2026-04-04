@@ -1,4 +1,4 @@
-import apiClient, { cachedGet } from './apiClient';
+import apiClient, { cachedGet, invalidateCache } from './apiClient';
 
 /**
  * Medication Service

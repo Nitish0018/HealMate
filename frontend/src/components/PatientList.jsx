@@ -4,6 +4,9 @@ import { getPatientsList, filterPatientsByName, sortPatientsByCompliance } from 
 import { ROUTES } from '../constants/routes';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+import BulkNudgeModal from './BulkNudgeModal';
+
+const ITEMS_PER_PAGE = 10;
 
 /**
  * PatientList Component
@@ -12,12 +15,15 @@ import ErrorMessage from './ErrorMessage';
  * @param {Object} props
  * @param {Function} props.onPatientSelect - Callback when patient is selected
  */
-const PatientList = ({ onPatientSelect }) => {
+const PatientList = ({ onPatientSelect, onSendSms }) => {
   const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState('all'); // 'all', 'critical', 'monitoring', 'stable'
+  const [isBulkNudgeOpen, setIsBulkNudgeOpen] = useState(false);
 
   // Fetch patients on component mount
   useEffect(() => {
@@ -52,8 +58,22 @@ const PatientList = ({ onPatientSelect }) => {
   // Filter and sort patients based on search query
   const filteredAndSortedPatients = useMemo(() => {
     let filtered = filterPatientsByName(patients, searchQuery);
+    
+    // Risk filtering
+    if (filter === 'critical') filtered = filtered.filter(p => p.complianceScore < 60);
+    if (filter === 'monitoring') filtered = filtered.filter(p => p.complianceScore >= 60 && p.complianceScore < 80);
+    if (filter === 'stable') filtered = filtered.filter(p => p.complianceScore >= 80);
+
     return sortPatientsByCompliance(filtered, true); // Sort ascending (lowest first as priority)
-  }, [patients, searchQuery]);
+  }, [patients, searchQuery, filter]);
+
+  // Paginate patients
+  const paginatedPatients = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAndSortedPatients.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredAndSortedPatients, currentPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedPatients.length / ITEMS_PER_PAGE);
 
   // Handle patient selection
   const handlePatientClick = (patient) => {
@@ -139,25 +159,55 @@ const PatientList = ({ onPatientSelect }) => {
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8 mb-10">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Patient Directory</h3>
-          <p className="text-sm text-gray-500 mt-1">Found {filteredAndSortedPatients.length} patients in your care</p>
+          <h3 className="font-serif text-3xl text-forest-500 leading-tight">Patient Directory</h3>
+          <p className="text-sm font-medium text-forest-500/30 mt-2">Found {filteredAndSortedPatients.length} active records</p>
         </div>
         
-        <div className="relative w-full sm:max-w-xs group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+        <div className="flex flex-col sm:flex-row gap-5 items-center">
+          {/* Risk Filters */}
+          <div className="flex items-center gap-1 bg-cream-100 p-1 rounded-full border border-cream-200/50 relative">
+            {['all', 'critical', 'stable'].map((risk) => (
+              <button
+                key={risk}
+                onClick={() => { setFilter(risk); setCurrentPage(1); }}
+                className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                  filter === risk 
+                    ? 'bg-forest-500 text-cream-50 shadow-warm' 
+                    : 'text-forest-300 hover:text-forest-500'
+                }`}
+              >
+                {risk}
+              </button>
+            ))}
           </div>
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl leading-5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium"
-          />
+
+          {/* Bulk Action Button - only visible on specific filters */}
+          {filter !== 'all' && filteredAndSortedPatients.length > 0 && (
+            <button 
+              onClick={() => setIsBulkNudgeOpen(true)}
+              className="px-6 py-2 bg-gold-50 text-gold-500 border border-gold-200 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gold-500 hover:text-cream-50 transition-all shadow-sm hover:shadow-warm-lg animate-fade-in"
+            >
+               Nudge All {filter}s →
+            </button>
+          )}
+
+          {/* Search bar */}
+          <div className="relative w-full sm:max-w-xs group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 text-forest-500/20 group-focus-within:text-forest-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Filter by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-4 py-3 bg-cream-50 border border-transparent rounded-2xl leading-5 placeholder-forest-500/20 focus:outline-none focus:ring-2 focus:ring-forest-500/20 focus:bg-white transition-all text-sm font-medium text-forest-500"
+            />
+          </div>
         </div>
       </div>
 
@@ -172,14 +222,14 @@ const PatientList = ({ onPatientSelect }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {filteredAndSortedPatients.length === 0 ? (
+            {paginatedPatients.length === 0 ? (
               <tr>
                 <td colSpan="4" className="py-12 text-center text-gray-400 font-medium">
                   No patients found matching your criteria.
                 </td>
               </tr>
             ) : (
-              filteredAndSortedPatients.map((patient) => {
+              paginatedPatients.map((patient) => {
                 const style = getComplianceStyle(patient.complianceScore);
                 return (
                   <tr 
@@ -189,20 +239,14 @@ const PatientList = ({ onPatientSelect }) => {
                   >
                     <td className="py-5">
                       <div className="flex items-center">
-                        <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-100 group-hover:scale-110 transition-transform">
+                        <div className="h-12 w-12 rounded-2xl bg-forest-50 flex items-center justify-center text-forest-500 font-serif text-lg border-2 border-white shadow-sm group-hover:scale-105 transition-transform">
                           {(patient.name || patient.email || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-bold text-gray-900">{patient.name || 'Anonymous User'}</div>
-                          <a
-                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${patient.email}&su=Regarding%20Your%20HealMate%20Account`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-gray-500 hover:text-blue-600 transition-colors"
-                            onClick={(e) => e.stopPropagation()} // Prevent row click when clicking email
-                          >
-                            {patient.email}
-                          </a>
+                          <div className="text-sm font-bold text-forest-500 leading-tight">{patient.name || 'Anonymous User'}</div>
+                          <span className="text-[10px] uppercase font-black tracking-widest text-forest-300">
+                             Patient ID {patient.subjectId || '#00000'}
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -239,10 +283,22 @@ const PatientList = ({ onPatientSelect }) => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-5 text-right">
-                      <button className="inline-flex items-center justify-center p-2 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 shadow-sm hover:shadow-md">
+                    <td className="py-5 text-right flex items-center justify-end gap-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onSendSms(patient); }}
+                        className="p-2.5 rounded-xl bg-gold-50 text-gold-500 hover:bg-gold-500 hover:text-cream-50 transition-all border border-transparent shadow-sm hover:shadow-warm group"
+                        title="Direct Intervention"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                      </button>
+                      <button 
+                        className="inline-flex items-center justify-center p-2.5 rounded-xl text-forest-500/20 hover:text-forest-500 hover:bg-forest-50 transition-all border border-transparent hover:border-forest-100 shadow-sm hover:shadow-md"
+                        title="Patient Profile"
+                      >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
                     </td>
@@ -265,6 +321,12 @@ const PatientList = ({ onPatientSelect }) => {
            </div>
         </div>
       )}
+
+      <BulkNudgeModal
+        isOpen={isBulkNudgeOpen}
+        onClose={() => setIsBulkNudgeOpen(false)}
+        patients={filteredAndSortedPatients}
+      />
     </div>
   );
 };

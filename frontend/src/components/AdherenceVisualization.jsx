@@ -73,7 +73,27 @@ const AdherenceVisualization = ({ refreshTrigger }) => {
     return '#ef4444';
   };
 
-  if (loading) return <div className="py-10 flex justify-center"><LoadingSpinner size="md" /></div>;
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse opacity-60">
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="h-3 w-16 skeleton rounded-md" />
+            <div className="h-8 w-24 skeleton rounded-md" />
+            <div className="h-3 w-32 skeleton rounded-md" />
+          </div>
+          <div className="w-16 h-16 rounded-full skeleton" />
+        </div>
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <div className="h-3 w-32 skeleton rounded-md" />
+            <div className="h-5 w-16 skeleton rounded-md" />
+          </div>
+          <div className="w-full h-40 skeleton rounded-xl" />
+        </div>
+      </div>
+    );
+  }
   if (error) return <div className="p-6 bg-red-50 rounded-2xl text-red-600 text-xs font-bold uppercase tracking-widest">{error}</div>;
 
   if (!adherenceData) {
@@ -164,4 +184,4 @@ const AdherenceVisualization = ({ refreshTrigger }) => {
   );
 };
 
-export default AdherenceVisualization;
+export default AdherenceVisualization;

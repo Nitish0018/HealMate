@@ -25,16 +25,19 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.mimic_subject_id) {
+      if (!user) {
         setLoading(false);
         return;
       }
+      
+      const subject_id = user.mimic_subject_id || 0;
+      
       try {
         setLoading(true);
         setError(null);
         const [medsResponse, logsResponse] = await Promise.all([
-          getPatientMedications(user.mimic_subject_id),
-          getPatientAdherenceLogs(user.mimic_subject_id)
+          getPatientMedications(subject_id),
+          getPatientAdherenceLogs(subject_id)
         ]);
         setMedications(medsResponse || []);
         setAdherenceLogs(logsResponse || []);
@@ -75,10 +78,18 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
       });
 
       let status = 'pending';
+      const gracePeriodMinutes = 120; // 2 hour grace period to stay "pending"
+      
       if (todayLog) {
         status = 'taken';
-      } else if (scheduledMinutes < currentTime && date.toDateString() === new Date().toDateString()) {
-        status = 'missed';
+      } else if (date.toDateString() === new Date().toDateString()) {
+        if (scheduledMinutes + gracePeriodMinutes < currentTime) {
+          status = 'missed'; // It's quite late
+        } else {
+          status = 'pending'; // Still within grace period or not yet time
+        }
+      } else if (date < new Date()) {
+        status = 'missed'; // Past date
       }
 
       return {
@@ -96,7 +107,25 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
     return schedule.sort((a, b) => a.scheduledMinutes - b.scheduledMinutes);
   }, [medications, adherenceLogs, date, currentTime]);
 
-  if (loading) return <div className="py-20 flex justify-center"><LoadingSpinner size="lg" /></div>;
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="bg-white rounded-2xl p-5 border border-cream-200 flex items-center justify-between opacity-50">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full skeleton" />
+              <div className="space-y-2">
+                <div className="h-4 w-32 skeleton rounded-md" />
+                <div className="h-3 w-20 skeleton rounded-md" />
+              </div>
+            </div>
+            <div className="h-8 w-24 skeleton rounded-lg" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (error) return <ErrorMessage message={error} onRetry={() => setLoading(true)} />;
 
   if (!dailySchedule.length) {
@@ -159,24 +188,22 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
                    </div>
                 </div>
 
-                {med.status === 'pending' && onLogIntake && (
+                {(med.status === 'pending' || med.status === 'missed') && onLogIntake && (
                   <button
                     onClick={() => onLogIntake(med.id)}
-                    className="w-full sm:w-auto px-6 py-3 bg-white border border-gray-200 hover:bg-green-600 hover:text-white hover:border-green-600 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95"
+                    className={`w-full sm:w-auto px-6 py-3 border rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 ${
+                      med.status === 'missed' 
+                        ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-600 hover:text-white hover:border-amber-600'
+                        : 'bg-white border-gray-200 hover:bg-green-600 hover:text-white hover:border-green-600'
+                    }`}
                   >
-                    Mark as Taken
+                    {med.status === 'missed' ? 'Log Late Intake' : 'Mark as Taken'}
                   </button>
                 )}
                 
                 {med.status === 'taken' && (
                   <span className="px-4 py-2 bg-green-100 text-green-700 text-[10px] font-black rounded-xl uppercase tracking-widest">
                     COMPLETED
-                  </span>
-                )}
-
-                {med.status === 'missed' && (
-                  <span className="px-4 py-2 bg-red-100 text-red-700 text-[10px] font-black rounded-xl uppercase tracking-widest font-mono">
-                    LOG MISSED
                   </span>
                 )}
               </div>
@@ -188,4 +215,4 @@ const MedicationSchedule = ({ date, onLogIntake, refreshTrigger }) => {
   );
 };
 
-export default MedicationSchedule;
+export default MedicationSchedule;

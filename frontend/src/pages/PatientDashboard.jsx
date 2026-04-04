@@ -59,7 +59,8 @@ const PatientDashboard = () => {
       setTimeout(() => setSuccessMessage(null), 4000);
       setIsModalOpen(false);
     } catch (err) {
-      setError('Unable to add medication. Please check your connection.');
+      const errorMessage = err.response?.data?.message || 'Unable to add medication. Please check your connection.';
+      setError(errorMessage);
     }
   };
 

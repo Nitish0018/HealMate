@@ -2,7 +2,9 @@ import {
   signInWithEmailAndPassword, 
   signOut, 
   createUserWithEmailAndPassword,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
@@ -23,6 +25,21 @@ export const login = async (email, password) => {
     return userCredential;
   } catch (error) {
     console.error('Login error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Sign in user with Google account
+ * @returns {Promise<UserCredential>} Firebase user credential
+ */
+export const loginWithGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    return userCredential;
+  } catch (error) {
+    console.error('Google Sign-In error:', error);
     throw error;
   }
 };

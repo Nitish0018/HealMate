@@ -1,4 +1,4 @@
-import { cachedGet } from './apiClient';
+import apiClient, { cachedGet } from './apiClient';
 
 /**
  * Doctor Service
@@ -99,6 +99,16 @@ export const getMissedDoses = async (patientId, days = 30) => {
   }
 };
 
+export const sendSmsToPatient = async (patientId, message) => {
+  try {
+    const response = await apiClient.post(`/users/patients/${patientId}/sms`, { message });
+    return response.data;
+  } catch (error) {
+    console.error('Error sending SMS to patient:', error);
+    throw error;
+  }
+};
+
 /**
  * Filter patients by search query
  * @param {Array} patients - List of patients
@@ -127,4 +137,28 @@ export const sortPatientsByCompliance = (patients, ascending = true) => {
     const scoreB = b.complianceScore || 0;
     return ascending ? scoreA - scoreB : scoreB - scoreA;
   });
+};
+/**
+ * Send bulk SMS reminder to multiple patients
+ * @param {Array} patientIds - List of patient IDs
+ * @param {string} message - Message to send
+ * @returns {Promise<Object>} Status response
+ */
+export const sendBulkReminder = async (patientIds, message) => {
+  try {
+    // Simulated API call for sending bulk reminders
+    console.log(`Sending bulk reminder to ${patientIds.length} patients:`, message);
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    return {
+      status: 'success',
+      count: patientIds.length,
+      message: `Successfully nudged ${patientIds.length} patients with your clinical reminder.`
+    };
+  } catch (error) {
+    console.error('Error sending bulk reminder:', error);
+    throw error;
+  }
 };

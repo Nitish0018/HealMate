@@ -127,7 +127,39 @@ const ManagedDependents = ({ onContact }) => {
     return 'stroke-rose-400';
   };
 
-  if (loading) return <div className="flex justify-center p-12"><LoadingSpinner /></div>;
+  if (loading) {
+    return (
+      <section className="space-y-10 animate-pulse opacity-60">
+        <div className="flex justify-between items-end gap-6 mb-8">
+           <div>
+             <div className="h-8 w-40 skeleton rounded-lg mb-2" />
+             <div className="h-4 w-64 skeleton rounded-md" />
+           </div>
+           <div className="h-10 w-64 skeleton rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2].map(i => (
+            <div key={i} className="card-warm p-6">
+               <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                     <div className="w-14 h-14 rounded-2xl skeleton" />
+                     <div className="space-y-2">
+                        <div className="h-6 w-32 skeleton rounded-md" />
+                        <div className="h-3 w-24 skeleton rounded-md" />
+                     </div>
+                  </div>
+                  <div className="h-6 w-20 skeleton rounded-full" />
+               </div>
+               <div className="space-y-4">
+                  <div className="h-4 w-full skeleton rounded-md" />
+                  <div className="h-4 w-[85%] skeleton rounded-md" />
+               </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-10 animate-fade-in-up">

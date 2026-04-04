@@ -6,9 +6,11 @@ import HighRiskAlerts from '../components/HighRiskAlerts';
 import AddPatientModal from '../components/AddPatientModal';
 import BulkPatientModal from '../components/BulkPatientModal';
 import AIInsightsModal from '../components/AIInsightsModal';
+import SendSmsModal from '../components/SendSmsModal';
 import { getPatientsList } from '../services/doctorService';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import LoadingSpinner from '../components/LoadingSpinner';
+import RecentActivity from '../components/RecentActivity';
 
 /**
  * DoctorDashboard Page
@@ -22,6 +24,13 @@ const DoctorDashboard = () => {
   const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
   const [isBulkViewOpen, setIsBulkViewOpen] = useState(false);
   const [isAIInsightsOpen, setIsAIInsightsOpen] = useState(false);
+  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  const handleOpenSmsModal = (patient) => {
+    setSelectedPatient(patient);
+    setIsSmsModalOpen(true);
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -244,7 +253,7 @@ const DoctorDashboard = () => {
 
             {/* Patient List */}
             <section className="card-warm p-2">
-              <PatientList />
+              <PatientList onSendSms={handleOpenSmsModal} />
             </section>
           </div>
 
@@ -252,6 +261,9 @@ const DoctorDashboard = () => {
           <aside className="lg:col-span-4 space-y-8">
             <section className="sticky top-24 space-y-8">
               <HighRiskAlerts patients={patients} />
+              
+              {/* Added: Recent Clinical Activity Feed */}
+              <RecentActivity patients={patients} />
 
               {/* AI Insights Card */}
               <div className="bg-forest-500 rounded-[2rem] p-7 text-cream-50 shadow-warm-lg">
@@ -318,6 +330,14 @@ const DoctorDashboard = () => {
         isOpen={isAIInsightsOpen}
         onClose={() => setIsAIInsightsOpen(false)}
       />
+
+      {selectedPatient && (
+        <SendSmsModal
+          isOpen={isSmsModalOpen}
+          onClose={() => setIsSmsModalOpen(false)}
+          patient={selectedPatient}
+        />
+      )}
     </div>
   );
 };

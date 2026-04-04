@@ -16,6 +16,24 @@ if (twilioSid && twilioToken) {
   twilioClient = twilio(twilioSid, twilioToken);
 }
 
+const sendSms = async (to, body) => {
+  if (!twilioClient) {
+    console.warn('Twilio client not initialized. SMS not sent.');
+    // In a real app, you might want to return an error here
+    return;
+  }
+  try {
+    await twilioClient.messages.create({
+      body,
+      from: twilioNumber,
+      to
+    });
+    console.log(`SMS sent to ${to}`);
+  } catch (error) {
+    console.error(`Error sending SMS to ${to}:`, error);
+  }
+};
+
 /**
  * Service to handle all application notifications (Push and SMS).
  */
@@ -159,4 +177,7 @@ const NotificationService = {
   },
 };
 
-module.exports = NotificationService;
+module.exports = {
+  ...NotificationService,
+  sendSms
+};

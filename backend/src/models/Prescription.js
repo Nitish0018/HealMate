@@ -19,7 +19,8 @@ const prescriptionSchema = new mongoose.Schema({
   dose_unit_rx: { type: String },
   form_val_disp: { type: String },
   form_unit_disp: { type: String },
-  route: { type: String }
+  route: { type: String },
+  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true }
 }, {
   collection: 'prescriptions',
   timestamps: false

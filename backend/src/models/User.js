@@ -38,7 +38,8 @@ const userSchema = new mongoose.Schema({
 
   // Relationships (Phase 7+: Caregiver Collaboration)
   caregiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  lastLoginAt: { type: Date, default: Date.now }
 }, {
   timestamps: true
 });

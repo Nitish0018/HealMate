@@ -84,10 +84,27 @@ const PatientDetailView = () => {
     return (
       <div className="min-h-screen bg-[#F8FAFC]">
         <Navigation />
-        <div className="flex flex-col items-center justify-center h-[60vh]">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-400 font-bold animate-pulse uppercase tracking-widest text-xs">Accessing Patient Records</p>
-        </div>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse w-full">
+          <div className="space-y-6 opacity-60">
+             <div className="h-4 w-24 skeleton rounded-md mb-8" />
+             <div className="flex justify-between items-center mb-8">
+               <div className="h-10 w-96 skeleton rounded-xl" />
+               <div className="h-10 w-32 skeleton rounded-xl" />
+             </div>
+            
+             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+              <div className="h-32 skeleton rounded-3xl" />
+              <div className="h-32 skeleton rounded-3xl" />
+              <div className="h-32 skeleton rounded-3xl" />
+              <div className="h-32 skeleton rounded-3xl" />
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+              <div className="h-[400px] skeleton rounded-3xl lg:col-span-2" />
+              <div className="h-[400px] skeleton rounded-3xl" />
+             </div>
+          </div>
+        </main>
       </div>
     );
   }

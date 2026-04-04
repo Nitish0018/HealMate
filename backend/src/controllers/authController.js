@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { sendWelcomeEmail, sendLoginConfirmation } = require('../services/emailService');
 
 const register = async (req, res, next) => {
   try {
@@ -18,6 +19,9 @@ const register = async (req, res, next) => {
       mimic_subject_id
     });
 
+    // Send a beautiful welcome email to the new patient
+    await sendWelcomeEmail(email, name);
+
     res.status(201).json({ success: true, data: user });
   } catch (error) {
     next(error);
@@ -36,8 +40,22 @@ const getProfile = async (req, res, next) => {
         email: req.user.email,
         name: req.user.name || req.user.email.split('@')[0],
         role: 'PATIENT', // Default role for auto-migrated users
-        passwordHash: 'firebase-managed'
+        passwordHash: 'firebase-managed',
+        lastLoginAt: new Date()
       });
+
+      // Send a beautiful welcome email to the new patient
+      await sendWelcomeEmail(user.email, user.name);
+    } else {
+      // Check if we should send a sign-in alert (every 12 hours)
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+      if (!user.lastLoginAt || user.lastLoginAt < twelveHoursAgo) {
+          await sendLoginConfirmation(user.email, user.name);
+      }
+      
+      // Update its last login time for security auditing
+      user.lastLoginAt = new Date();
+      await user.save();
     }
     
     res.status(200).json({ success: true, data: user });

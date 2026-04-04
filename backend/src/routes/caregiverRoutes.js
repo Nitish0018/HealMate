@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const caregiverController = require('../controllers/caregiverController');
-const { protect } = require('../middleware/authMiddleware');
+const { verifyToken } = require('../middleware/authMiddleware');
 
 /**
  * Caregiver Routes
@@ -9,7 +9,7 @@ const { protect } = require('../middleware/authMiddleware');
  */
 
 // Authenticated caregiver operations
-router.use(protect);
+router.use(verifyToken);
 
 router.get('/patients', caregiverController.getMyPatients);
 router.post('/invite', caregiverController.invitePatient);
